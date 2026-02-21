@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+		<title>侠盗猎车:罪恶都市•网页版</title>
+		<link href="./style.css" rel="stylesheet" />
+	</head>
+	<body data-is-touch="0" data-state-car="0" data-state-car-gun="0" data-state-gun="0" data-state-bike="0"
+		data-state-menu="1" data-state-cutscene="0" data-state-mobring="0" data-state-job="0"
+		data-state-disable-controls="0" data-state-panzer="0" data-state-car-with-weapon="0" data-state-hunter="0"
+		data-state-scope-mode="0" data-state-scope-gun="0">
+		<div class="wasted-container" hidden></div>
+		<div class="intro-container" hidden>
+			<video class="intro" src="./vcsky/intro.mp4" preload="auto" loop disablepictureinpicture></video>
+			<div class="loader-container">
+				<div id='spinner'>
+					<div class="progress-bar-fill"></div>
+				</div>
+				<div id="status">Downloading...</div>
+				<div><progress id="progress"></progress></div>
+			</div>
+		</div>
+		<div class="start-container">
+			<div class="button-container">
+				<img class="cover" src="./vcsky/cover.jpg" alt="侠盗猎车:罪恶都市" draggable="false" loading="lazy" />
+				<div id="config-panel">
+					<div class="config-option">
+						<label for="config-lang">
+							<span id="config-lang-label">Language:</span>
+							<select id="config-lang">
+								<option value="zh">简体中文</option>
+								<option value="en">English</option>
+								<option value="ru">русский язык</option>
+							</select>
+						</label>
+					</div>
+					<div class="config-option">
+						<label for="config-cheats">
+							<input type="checkbox" id="config-cheats">
+							<span id="config-cheats-label">Cheats (F3)</span>
+						</label>
+					</div>
+					<div class="config-option">
+						<label for="config-fullscreen">
+							<input type="checkbox" id="config-fullscreen" checked>
+							<span id="config-fullscreen-label">Fullscreen</span>
+						</label>
+					</div>
+					<div class="config-option">
+						<label for="config-max-fps">
+							<span id="config-max-fps-label">Max FPS:</span>
+							<input type="number" id="config-max-fps" min="0" max="240" value="0">
+							<span id="config-max-fps-unlimited" style="font-size: 0.8em;">(0 = unlimited)</span>
+						</label>
+					</div>
+				</div>
+				<div id="click-to-play">
+					<button id="click-to-play-button" class="disabled">Click to play</button>
+					<div id="demo-off-disclaimer"></div>
+				</div>
+			</div>
+			<div class="disclaimer">
+				<span id="disclaimer-text">DISCLAIMER:</span>
+				<span class="eula">
+					<span id="disclaimer-sources">
+						This game is based on an open source version of GTA: Vice City. It is not a commercial release
+						and
+						is not affiliated with Rockstar Games.
+					</span>
+					<a href="https://github.com/SugaryHull/re3/tree/miami" target="_blank">Github</a>
+					<p id="play-demo-text">You can play the DEMO version, or provide the original
+						game files to continue playing.</p>
+					<p style="margin-bottom: 0;">
+						<input type="checkbox" id="disclaimer-checkbox">
+						<label id="disclaimer-checkbox-label" for="disclaimer-checkbox">I own the original game</label>
+					</p>
+				</span>
+			</div>
+			<table id="config-table">
+				<thead>
+					<tr>
+						<th id="table-header-item"></th>
+						<th id="table-header-range"></th>
+						<th id="table-header-desc"></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>lang</td>
+						<td>zh, en, ru</td>
+						<td id="config-desc-lang"></td>
+					</tr>
+					<tr>
+						<td>cheats</td>
+						<td>1</td>
+						<td id="config-desc-cheats"></td>
+					</tr>
+					<tr>
+						<td>request_original_game</td>
+						<td>1</td>
+						<td id="config-desc-original-game"></td>
+					</tr>
+					<tr>
+						<td>fullscreen</td>
+						<td>0</td>
+						<td id="config-desc-fullscreen"></td>
+					</tr>
+					<tr>
+						<td>max_fps</td>
+						<td>1-240</td>
+						<td id="config-desc-max-fps"></td>
+					</tr>
+					<tr>
+						<td>configurable</td>
+						<td>1</td>
+						<td id="config-desc-configurable"></td>
+					</tr>
+				</tbody>
+			</table>
+			<footer class="footer">本站由 <a class="cf" href="https://www.cloudflare.com" target="_blank"><img
+						src="https://www.cloudflare.com/favicon.ico" alt="Cloudflare"> Cloudflare</a> 和 <a class="eo"
+					href="https://curl.qcloud.com/0f8yZ85J" target="_blank"><img src="https://edgeone.ai/favicon.ico"
+						alt="EdgeOne"> EdgeOne</a> 提供CDN服务</footer>
+		</div>
+		<input type="file" id="original-game-file" hidden>
+		<canvas id="canvas"></canvas>
+		<div class="touch-controls-wrapper">
+			<div id="move"></div>
+			<div id="look"></div>
+			<div class="touch-control radio"></div>
+			<div class="touch-control weapon"></div>
+			<div class="touch-control menu"></div>
+			<div class="touch-control fist"></div>
+			<div class="touch-control drift"></div>
+			<div class="touch-control run"></div>
+			<div class="touch-control car getIn"></div>
+			<div class="touch-control left"></div>
+			<div class="touch-control right"></div>
+			<div class="touch-control jump"></div>
+			<div class="touch-control car getOut"></div>
+			<div class="touch-control camera"></div>
+			<div class="touch-control mobile"></div>
+			<div class="touch-control job"></div>
+			<div class="touch-control horn"></div>
+			<div class="touch-control fireRight"></div>
+			<div class="touch-control fireLeft"></div>
+		</div>
+		<script defer type='text/javascript' src="./modules/7z/js7z.js"></script>
+		<script defer type='text/javascript' src="./script.js"></script>
+		<script defer type='text/javascript' src="./jsdos-cloud-sdk-local.js"></script>
+		<!-- 谷歌自动广告 -->
+		<script async
+			src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3670070169085381"
+			crossorigin="anonymous"></script>
+		<noscript>
+			<h1>本站功能实现依赖了大量JS，您的浏览器不支持或未启用JS！</h1>
+		</noscript>
+	</body>
+</html>
