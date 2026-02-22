@@ -62,17 +62,16 @@
 				</div>
 			</div>
 			<div class="disclaimer">
-				<span id="disclaimer-text">DISCLAIMER:</span>
+				<p id="disclaimer-text">DISCLAIMER:</p>
 				<span class="eula">
 					<span id="disclaimer-sources">
 						This game is based on an open source version of GTA: Vice City. It is not a commercial release
-						and
-						is not affiliated with Rockstar Games.
+						and is not affiliated with Rockstar Games.
 					</span>
-					<a href="https://github.com/SugaryHull/re3/tree/miami" target="_blank">Github</a>
-					<p id="play-demo-text">You can play the DEMO version, or provide the original
+					<a href="https://github.com/SugaryHull/re3/tree/miami" target="_blank">(Github)</a>
+					<p id="play-demo-text" style="display: none;">You can play the DEMO version, or provide the original
 						game files to continue playing.</p>
-					<p style="margin-bottom: 0;">
+					<p style="margin-bottom: 0;display: none;">
 						<input type="checkbox" id="disclaimer-checkbox">
 						<label id="disclaimer-checkbox-label" for="disclaimer-checkbox">I own the original game</label>
 					</p>
@@ -119,10 +118,10 @@
 					</tr>
 				</tbody>
 			</table>
-			<footer class="footer">本站由 <a class="cf" href="https://www.cloudflare.com" target="_blank"><img
+			<footer class="footer">由 <a class="cf" href="https://www.cloudflare.com" target="_blank"><img
 						src="https://www.cloudflare.com/favicon.ico" alt="Cloudflare"> Cloudflare</a> 和 <a class="eo"
 					href="https://curl.qcloud.com/0f8yZ85J" target="_blank"><img src="https://edgeone.ai/favicon.ico"
-						alt="EdgeOne"> EdgeOne</a> 提供CDN服务</footer>
+						alt="EdgeOne"> EdgeOne</a> 提供CDN加速</footer>
 		</div>
 		<input type="file" id="original-game-file" hidden>
 		<canvas id="canvas"></canvas>

@@ -1173,7 +1173,7 @@ const zipdata = async () => {
 			const datalen = Number(response.headers.get('Content-Length'));
 			const zdata = response.body.getReader();
 			let chunks = [];
-			let totalLength = 0;
+			let receivedLength = 0;
 			// 流式下载文件
 			while (true) {
 				const {
@@ -1182,13 +1182,12 @@ const zipdata = async () => {
 				} = await zdata.read();
 				if (done) break;
 				chunks.push(value);
-				totalLength += value.length;
-				setStatus(`Downloading...(${totalLength}/${datalen})`);
+				receivedLength += value.length;
+				setStatus(`Downloading...(${receivedLength}/${datalen})`);
 				await new Promise(resolve => setTimeout(resolve, 0));
 			}
-
-			// 修复：正确创建Uint8Array并拼接数据
-			buffer = new Uint8Array(totalLength);
+			// 拼接二进制数据
+			buffer = new Uint8Array(receivedLength);
 			await runInSlices(function*() {
 				let position = 0;
 				for (let chunk of chunks) {
@@ -1274,58 +1273,58 @@ const revc_ini = (() => {
 	}
 	return `
 	[VideoMode]
-	Width=800
-	Height=600
+	Width=1024
+	Height=768
 	Depth=32
 	Subsystem=0
 	Windowed=0
 	[Controller]
-	HeadBob1stPerson=0
+	HeadBob1stPerson=1
 	HorizantalMouseSens=0.002500
 	InvertMouseVertically=1
 	DisableMouseSteering=1
-	Vibration=0
-	Method=${isTouch ? '1' : '0'}
+	Vibration=1
+	Method=${isTouch ? 1 : 0}
 	InvertPad=0
 	JoystickName=
 	PadButtonsInited=0
 	[Audio]
-	SfxVolume=36
-	MusicVolume=37
+	SfxVolume=65
+	MusicVolume=65
 	MP3BoostVolume=0
 	Radio=0
 	SpeakerType=0
 	Provider=0
 	DynamicAcoustics=1
 	[Display]
-	Brightness=256
+	Brightness=384
 	DrawDistance=1.800000
-	Subtitles=0
+	Subtitles=1
 	ShowHud=1
 	RadarMode=0
-	ShowLegends=0
-	PedDensity=1.200000
-	CarDensity=1.200000
+	ShowLegends=1
+	PedDensity=100
+	CarDensity=100
 	CutsceneBorders=1
-	FreeCam=0
+	FreeCam=1
 	[Graphics]
 	AspectRatio=0
 	VSync=1
 	Trails=1
 	FrameLimiter=0
-	MultiSampling=0
-	IslandLoading=0
+	MultiSampling=1
+	IslandLoading=2
 	PS2AlphaTest=1
-	ColourFilter=2
-	MotionBlur=0
-	VehiclePipeline=0
-	NeoRimLight=0
-	NeoLightMaps=0
-	NeoRoadGloss=0
+	ColourFilter=1
+	MotionBlur=1
+	VehiclePipeline=1
+	NeoRimLight=1
+	NeoLightMaps=1
+	NeoRoadGloss=1
 	[General]
 	SkinFile=$$""
 	Language=0
-	DrawVersionText=0
+	DrawVersionText=1
 	NoMovies=0
 	[CustomPipesValues]
 	PostFXIntensity=1.000000
@@ -1436,8 +1435,7 @@ const startGame = async (e) => {
 		canvas: function() {
 			const canvas = document.getElementById('canvas');
 			canvas.addEventListener('webglcontextlost', (e) => {
-				statusElement.textContent =
-					'WebGL context lost. Please reload the page.';
+				statusElement.textContent = 'WebGL context lost. Please reload the page.';
 				e.preventDefault();
 			});
 			return canvas;
@@ -1447,8 +1445,7 @@ const startGame = async (e) => {
 		monitorRunDependencies: (num) => {
 			Module.totalDependencies = Math.max(Module.totalDependencies, num);
 			Module.setStatus(
-				`Preparing... (${Module.totalDependencies - num}/${Module.totalDependencies})`
-			);
+				`Preparing... (${Module.totalDependencies - num}/${Module.totalDependencies})`);
 		},
 		hotelMission: () => {
 			if (!haveOriginalGame) {

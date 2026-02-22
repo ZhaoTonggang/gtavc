@@ -31,182 +31,121 @@ var Fetch = {
 	}
 };
 
-// 路径标准化工具函数 - 统一斜杠、去除多余分隔符、处理绝对/相对路径
-function normalizePath(path) {
-	if (!path) return path;
-	return path
-		.replace(/\\+/g, '/') // 所有反斜杠替换为正斜杠
-		.replace(/\/+/g, '/') // 多个正斜杠合并为一个
-		.replace(/^\/+/, '') // 移除开头多余的正斜杠（适配js7z相对路径）
-		.replace(/\/$/, ''); // 移除结尾多余的正斜杠
-}
-
-// fetchXHR函数（路径标准化+js7z读取兜底+错误细化）
-function fetchXHR(fetch, onsuccess, onerror, onprogress, onreadystatechange) {
+function fetchJS7zFile(fetch, onsuccess, onerror, onprogress, onreadystatechange) {
 	var url = HEAPU32[fetch + 8 >> 2];
 	if (!url) {
-		onerror(fetch, "no url specified!");
-		return;
+		// 无URL时：触发错误+直接返回，不重复处理
+		onerror(fetch);
+		return
 	}
-	// 标准化路径 - 解决混合斜杠问题
-	var rawUrl = UTF8ToString(url);
-	var url_ = normalizePath(rawUrl.replace('https://cdn.dos.zone/vcsky', ''));
+	var filePath = UTF8ToString(url).replace('https://cdn.dos.zone/vcsky', '');
 	var fetch_attr = fetch + 108;
 	var fetchAttributes = HEAPU32[fetch_attr + 52 >> 2];
 	var fetchAttrLoadToMemory = !!(fetchAttributes & 1);
 	var fetchAttrSynchronous = !!(fetchAttributes & 64);
-
-	// 分配ID
 	var id = Fetch.xhrs.allocate({
-		url: url_,
-		rawUrl: rawUrl
+		path: filePath,
+		status: "pending"
 	});
 	HEAPU32[fetch >> 2] = id;
-
-	// 模拟readyStateChange回调
-	function triggerReadyStateChange(readyState, status = 200) {
-		HEAP16[fetch + 40 >> 1] = readyState;
-		if (readyState >= 2) {
-			HEAP16[fetch + 42 >> 1] = status;
+	// 句柄校验函数
+	function checkHandleValid() {
+		if (!Fetch.xhrs.has(id)) {
+			console.warn(`File read handle ${id} is invalid, skip callback`);
+			return false;
 		}
-		onreadystatechange && onreadystatechange(fetch, {
-			type: 'readystatechange'
-		});
+		return true;
 	}
 
-	// 模拟进度回调
-	function triggerProgress(total) {
-		if (!onprogress) return;
-		var ptrLen = fetchAttrLoadToMemory ? total : 0;
-		var ptr = 0;
-		if (ptrLen > 0) {
-			ptr = _realloc(HEAPU32[fetch + 12 >> 2], ptrLen);
-		}
-		HEAPU32[fetch + 12 >> 2] = ptr;
-		writeI53ToI64(fetch + 16, ptrLen);
-		writeI53ToI64(fetch + 24, total - ptrLen);
-		writeI53ToI64(fetch + 32, total);
-		HEAP16[fetch + 40 >> 1] = 3; // LOADING状态
-		HEAP16[fetch + 42 >> 1] = 200;
-		onprogress(fetch, {
-			loaded: total,
-			total: total
-		});
-	}
-
-	// 保存响应数据
 	function saveResponseAndStatus(data) {
 		var ptr = 0;
 		var ptrLen = 0;
-		if (data && fetchAttrLoadToMemory && HEAPU32[fetch + 12 >> 2] === 0) {
-			ptrLen = data.byteLength || 0;
-		}
+		if (data && fetchAttrLoadToMemory && HEAPU32[fetch + 12 >> 2] === 0) ptrLen = data.byteLength;
 		if (ptrLen > 0) {
 			ptr = _realloc(HEAPU32[fetch + 12 >> 2], ptrLen);
-			HEAPU8.set(new Uint8Array(data), ptr);
+			HEAPU8.set(new Uint8Array(data), ptr)
 		}
 		HEAPU32[fetch + 12 >> 2] = ptr;
 		writeI53ToI64(fetch + 16, ptrLen);
 		writeI53ToI64(fetch + 24, 0);
-		var len = data ? (data.byteLength || 0) : 0;
-		if (len) {
-			writeI53ToI64(fetch + 32, len);
-		}
-		HEAP16[fetch + 40 >> 1] = 4; // DONE状态
-		if (data) {
-			HEAP16[fetch + 42 >> 1] = 200;
-			stringToUTF8("OK", fetch + 44, 64);
-		} else {
-			HEAP16[fetch + 42 >> 1] = 404;
-			stringToUTF8("File not found", fetch + 44, 64);
-		}
+		writeI53ToI64(fetch + 32, data ? data.byteLength : 0);
+		HEAP16[fetch + 40 >> 1] = 4;
+		HEAP16[fetch + 42 >> 1] = 200;
+		stringToUTF8("OK", fetch + 44, 64);
 		if (fetchAttrSynchronous) {
-			var ruPtr = stringToNewUTF8(url_);
-			HEAPU32[fetch + 200 >> 2] = ruPtr;
+			var ruPtr = stringToNewUTF8(filePath);
+			HEAPU32[fetch + 200 >> 2] = ruPtr
 		}
 	}
-
-	// 模拟XHR的状态变化流程
-	triggerReadyStateChange(1); // OPENED
-	triggerReadyStateChange(2); // HEADERS_RECEIVED
-
+	var arrayBuffer = null;
 	try {
-		// 标准化后再调用js7z.FS.readFile
-		var fileData = js7z.FS.readFile(url_);
-		// 数据格式强适配：确保转为ArrayBuffer，兼容js7z不同返回格式
-		var arrayBuffer;
-		if (fileData instanceof ArrayBuffer) {
-			arrayBuffer = fileData;
-		} else if (fileData instanceof Uint8Array) {
+		// 先校验句柄（防止已释放的请求继续执行）
+		if (!checkHandleValid()) return;
+		var fileData = js7z.FS.readFile(filePath.includes('\\') ? filePath.replace(/\\/g, '/') : filePath);
+		if (fileData instanceof Uint8Array) {
 			arrayBuffer = fileData.buffer;
-		} else if (typeof fileData === 'string') {
-			arrayBuffer = new TextEncoder().encode(fileData).buffer;
+		} else if (fileData instanceof ArrayBuffer) {
+			arrayBuffer = fileData;
 		} else {
-			throw new Error(`Unsupported file data type for ${url_}`);
+			arrayBuffer = new TextEncoder().encode(fileData).buffer;
 		}
-
-		// 触发进度和完成回调
-		triggerProgress(arrayBuffer.byteLength);
-		triggerReadyStateChange(3); // LOADING
+		onprogress(fetch);
+		onreadystatechange(fetch);
 		saveResponseAndStatus(arrayBuffer);
-		triggerReadyStateChange(4); // DONE
-		onsuccess && onsuccess(fetch, {
-			response: arrayBuffer,
-			status: 200,
-			statusText: "OK"
-		}, {
-			type: 'load'
-		});
-
+		onsuccess(fetch);
+		Fetch.xhrs.free(id)
 	} catch (e) {
-		// 细化错误类型，避免无意义重试
-		saveResponseAndStatus(null);
-		// 明确抛出路径/文件相关错误，方便上层排查
-		const errorMsg = `js7z read fail: ${url_}, raw: ${rawUrl}, reason: ${e.message}`;
-		console.error(errorMsg); // 控制台打印详细错误，便于调试
-		onerror && onerror(fetch, new Error(errorMsg));
+		// 失败时：先校验句柄→触发错误回调→释放句柄
+		if (!checkHandleValid()) return;
+		onprogress(fetch);
+		onreadystatechange(fetch);
+		saveResponseAndStatus(arrayBuffer);
+		onerror(fetch);
+		Fetch.xhrs.free(id)
+	} finally {
+		// if (checkHandleValid()) Fetch.xhrs.free(id); // 释放句柄，阻止重复回调
 	}
 }
 
 function fetchCacheData(db, fetch, data, onsuccess, onerror) {
 	if (!db) {
 		onerror(fetch, 0, "IndexedDB not available!");
-		return;
+		return
 	}
 	var fetch_attr = fetch + 108;
 	var destinationPath = HEAPU32[fetch_attr + 64 >> 2];
 	destinationPath ||= HEAPU32[fetch + 8 >> 2];
-	var destinationPathStr = normalizePath(UTF8ToString(destinationPath)); // 路径标准化
+	var destinationPathStr = UTF8ToString(destinationPath);
 	try {
 		var transaction = db.transaction(["FILES"], "readwrite");
 		var packages = transaction.objectStore("FILES");
 		var putRequest = packages.put(data, destinationPathStr);
-		putRequest.onsuccess = event => {
+		putRequest.onsuccess = () => {
 			HEAP16[fetch + 40 >> 1] = 4;
 			HEAP16[fetch + 42 >> 1] = 200;
 			stringToUTF8("OK", fetch + 44, 64);
-			onsuccess(fetch, 0, destinationPathStr);
+			onsuccess(fetch, 0, destinationPathStr)
 		};
 		putRequest.onerror = error => {
 			HEAP16[fetch + 40 >> 1] = 4;
 			HEAP16[fetch + 42 >> 1] = 413;
 			stringToUTF8("Payload Too Large", fetch + 44, 64);
-			onerror(fetch, 0, error);
-		};
+			onerror(fetch, 0, error)
+		}
 	} catch (e) {
-		onerror(fetch, 0, e);
+		onerror(fetch, 0, e)
 	}
 }
 
 function fetchLoadCachedData(db, fetch, onsuccess, onerror) {
 	if (!db) {
 		onerror(fetch, 0, "IndexedDB not available!");
-		return;
+		return
 	}
 	var fetch_attr = fetch + 108;
 	var path = HEAPU32[fetch_attr + 64 >> 2];
 	path ||= HEAPU32[fetch + 8 >> 2];
-	var pathStr = normalizePath(UTF8ToString(path)); // 路径标准化
+	var pathStr = UTF8ToString(path);
 	try {
 		var transaction = db.transaction(["FILES"], "readonly");
 		var packages = transaction.objectStore("FILES");
@@ -214,7 +153,7 @@ function fetchLoadCachedData(db, fetch, onsuccess, onerror) {
 		getRequest.onsuccess = event => {
 			if (event.target.result) {
 				var value = event.target.result;
-				var len = value.byteLength || value.length || 0;
+				var len = value.byteLength || value.length;
 				var ptr = _malloc(len);
 				HEAPU8.set(new Uint8Array(value), ptr);
 				HEAPU32[fetch + 12 >> 2] = ptr;
@@ -224,34 +163,34 @@ function fetchLoadCachedData(db, fetch, onsuccess, onerror) {
 				HEAP16[fetch + 40 >> 1] = 4;
 				HEAP16[fetch + 42 >> 1] = 200;
 				stringToUTF8("OK", fetch + 44, 64);
-				onsuccess(fetch, 0, value);
+				onsuccess(fetch, 0, value)
 			} else {
 				HEAP16[fetch + 40 >> 1] = 4;
 				HEAP16[fetch + 42 >> 1] = 404;
 				stringToUTF8("Not Found", fetch + 44, 64);
-				onerror(fetch, 0, `Cache not found: ${pathStr}`);
+				onerror(fetch, 0, "no data")
 			}
 		};
 		getRequest.onerror = error => {
 			HEAP16[fetch + 40 >> 1] = 4;
 			HEAP16[fetch + 42 >> 1] = 404;
 			stringToUTF8("Not Found", fetch + 44, 64);
-			onerror(fetch, 0, error);
-		};
+			onerror(fetch, 0, error)
+		}
 	} catch (e) {
-		onerror(fetch, 0, e);
+		onerror(fetch, 0, e)
 	}
 }
 
 function fetchDeleteCachedData(db, fetch, onsuccess, onerror) {
 	if (!db) {
 		onerror(fetch, 0, "IndexedDB not available!");
-		return;
+		return
 	}
 	var fetch_attr = fetch + 108;
 	var path = HEAPU32[fetch_attr + 64 >> 2];
 	path ||= HEAPU32[fetch + 8 >> 2];
-	var pathStr = normalizePath(UTF8ToString(path)); // 路径标准化
+	var pathStr = UTF8ToString(path);
 	try {
 		var transaction = db.transaction(["FILES"], "readwrite");
 		var packages = transaction.objectStore("FILES");
@@ -265,16 +204,16 @@ function fetchDeleteCachedData(db, fetch, onsuccess, onerror) {
 			HEAP16[fetch + 40 >> 1] = 4;
 			HEAP16[fetch + 42 >> 1] = 200;
 			stringToUTF8("OK", fetch + 44, 64);
-			onsuccess(fetch, 0, value);
+			onsuccess(fetch, 0, value)
 		};
 		request.onerror = error => {
 			HEAP16[fetch + 40 >> 1] = 4;
 			HEAP16[fetch + 42 >> 1] = 404;
 			stringToUTF8("Not Found", fetch + 44, 64);
-			onerror(fetch, 0, error);
-		};
+			onerror(fetch, 0, error)
+		}
 	} catch (e) {
-		onerror(fetch, 0, e);
+		onerror(fetch, 0, e)
 	}
 }
 
@@ -289,55 +228,73 @@ function _emscripten_start_fetch(fetch, successcb, errorcb, progresscb, readysta
 
 	function doCallback(f) {
 		if (fetchAttrSynchronous) {
-			f();
+			f()
 		} else {
-			callUserCallback(f);
+			callUserCallback(f)
 		}
 	}
-	var reportSuccess = (fetch, xhr, e) => {
+	var reportSuccess = (fetch) => {
 		doCallback(() => {
-			if (onsuccess) getWasmTableEntry(onsuccess)(fetch);
-			else successcb?.(fetch);
-		});
+			if (onsuccess) {
+				getWasmTableEntry(onsuccess)(fetch)
+			} else {
+				successcb?.(fetch)
+			}
+		})
 	};
-	var reportProgress = (fetch, e) => {
+	var reportProgress = (fetch) => {
 		doCallback(() => {
-			if (onprogress) getWasmTableEntry(onprogress)(fetch);
-			else progresscb?.(fetch);
-		});
+			if (onprogress) {
+				getWasmTableEntry(onprogress)(fetch)
+			} else {
+				progresscb?.(fetch)
+			}
+		})
 	};
-	var reportError = (fetch, e) => {
+	var reportError = (fetch) => {
 		doCallback(() => {
-			if (onerror) getWasmTableEntry(onerror)(fetch);
-			else errorcb?.(fetch);
-		});
+			if (onerror) {
+				getWasmTableEntry(onerror)(fetch)
+			} else {
+				errorcb?.(fetch)
+			}
+		})
 	};
-	var reportReadyStateChange = (fetch, e) => {
+	var reportReadyStateChange = (fetch) => {
 		doCallback(() => {
-			if (onreadystatechange) getWasmTableEntry(onreadystatechange)(fetch);
-			else readystatechangecb?.(fetch);
-		});
+			if (onreadystatechange) {
+				getWasmTableEntry(onreadystatechange)(fetch)
+			} else {
+				readystatechangecb?.(fetch)
+			}
+		})
 	};
-	var performUncachedXhr = (fetch, xhr, e) => {
-		fetchXHR(fetch, reportSuccess, reportError, reportProgress, reportReadyStateChange);
+	var performUncachedFileRead = (fetch) => {
+		fetchJS7zFile(fetch, reportSuccess, reportError, reportProgress, reportReadyStateChange)
 	};
-	var cacheResultAndReportSuccess = (fetch, xhr, e) => {
-		var storeSuccess = (fetch, xhr, e) => {
+	var cacheResultAndReportSuccess = (fetch, fileObj) => {
+		var storeSuccess = (fetch) => {
 			doCallback(() => {
-				if (onsuccess) getWasmTableEntry(onsuccess)(fetch);
-				else successcb?.(fetch);
-			});
+				if (onsuccess) {
+					getWasmTableEntry(onsuccess)(fetch)
+				} else {
+					successcb?.(fetch)
+				}
+			})
 		};
-		var storeError = (fetch, xhr, e) => {
+		var storeError = (fetch) => {
 			doCallback(() => {
-				if (onsuccess) getWasmTableEntry(onsuccess)(fetch);
-				else successcb?.(fetch);
-			});
+				if (onsuccess) {
+					getWasmTableEntry(onsuccess)(fetch)
+				} else {
+					successcb?.(fetch)
+				}
+			})
 		};
-		fetchCacheData(Fetch.dbInstance, fetch, xhr?.response, storeSuccess, storeError);
+		fetchCacheData(Fetch.dbInstance, fetch, fileObj.response, storeSuccess, storeError)
 	};
-	var performCachedXhr = (fetch, xhr, e) => {
-		fetchXHR(fetch, cacheResultAndReportSuccess, reportError, reportProgress, reportReadyStateChange);
+	var performCachedFileRead = (fetch) => {
+		fetchJS7zFile(fetch, cacheResultAndReportSuccess, reportError, reportProgress, reportReadyStateChange)
 	};
 	var requestMethod = UTF8ToString(fetch_attr + 0);
 	var fetchAttrReplace = !!(fetchAttributes & 16);
@@ -346,17 +303,17 @@ function _emscripten_start_fetch(fetch, successcb, errorcb, progresscb, readysta
 	if (requestMethod === "EM_IDB_STORE") {
 		var ptr = HEAPU32[fetch_attr + 84 >> 2];
 		var size = HEAPU32[fetch_attr + 88 >> 2];
-		fetchCacheData(Fetch.dbInstance, fetch, HEAPU8.slice(ptr, ptr + size), reportSuccess, reportError);
+		fetchCacheData(Fetch.dbInstance, fetch, HEAPU8.slice(ptr, ptr + size), reportSuccess, reportError)
 	} else if (requestMethod === "EM_IDB_DELETE") {
-		fetchDeleteCachedData(Fetch.dbInstance, fetch, reportSuccess, reportError);
+		fetchDeleteCachedData(Fetch.dbInstance, fetch, reportSuccess, reportError)
 	} else if (!fetchAttrReplace) {
 		fetchLoadCachedData(Fetch.dbInstance, fetch, reportSuccess, fetchAttrNoDownload ? reportError :
-			fetchAttrPersistFile ? performCachedXhr : performUncachedXhr);
+			fetchAttrPersistFile ? performCachedFileRead : performUncachedFileRead)
 	} else if (!fetchAttrNoDownload) {
-		fetchXHR(fetch, fetchAttrPersistFile ? cacheResultAndReportSuccess : reportSuccess, reportError, reportProgress,
-			reportReadyStateChange);
+		fetchJS7zFile(fetch, fetchAttrPersistFile ? cacheResultAndReportSuccess : reportSuccess, reportError,
+			reportProgress, reportReadyStateChange)
 	} else {
-		return 0;
+		return 0
 	}
-	return fetch;
+	return fetch
 }
