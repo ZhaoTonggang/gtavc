@@ -11,7 +11,6 @@
 		data-state-menu="1" data-state-cutscene="0" data-state-mobring="0" data-state-job="0"
 		data-state-disable-controls="0" data-state-panzer="0" data-state-car-with-weapon="0" data-state-hunter="0"
 		data-state-scope-mode="0" data-state-scope-gun="0">
-		<div class="wasted-container" hidden></div>
 		<div class="intro-container" hidden>
 			<video class="intro" src="./vcsky/intro.mp4" preload="auto" loop disablepictureinpicture></video>
 			<div class="loader-container">
@@ -38,7 +37,7 @@
 					</div>
 					<div class="config-option">
 						<label for="config-cheats">
-							<input type="checkbox" id="config-cheats">
+							<input type="checkbox" id="config-cheats" checked>
 							<span id="config-cheats-label">Cheats (F3)</span>
 						</label>
 					</div>
@@ -57,67 +56,50 @@
 					</div>
 				</div>
 				<div id="click-to-play">
-					<button id="click-to-play-button" class="disabled">Click to play</button>
-					<div id="demo-off-disclaimer"></div>
+					<button id="click-to-play-button">Click to play</button>
 				</div>
 			</div>
 			<div class="disclaimer">
 				<p id="disclaimer-text">DISCLAIMER:</p>
-				<span class="eula">
-					<span id="disclaimer-sources">
-						This game is based on an open source version of GTA: Vice City. It is not a commercial release
-						and is not affiliated with Rockstar Games.
-					</span>
-					<a href="https://github.com/SugaryHull/re3/tree/miami" target="_blank">(Github)</a>
-					<p id="play-demo-text" style="display: none;">You can play the DEMO version, or provide the original
-						game files to continue playing.</p>
-					<p style="margin-bottom: 0;display: none;">
-						<input type="checkbox" id="disclaimer-checkbox">
-						<label id="disclaimer-checkbox-label" for="disclaimer-checkbox">I own the original game</label>
-					</p>
+				<span id="disclaimer-sources">
+					This game is based on an open source version of GTA: Vice City. It is not a commercial release
+					and is not affiliated with Rockstar Games.
 				</span>
 			</div>
-			<table id="config-table">
-				<thead>
-					<tr>
-						<th id="table-header-item"></th>
-						<th id="table-header-range"></th>
-						<th id="table-header-desc"></th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>lang</td>
-						<td>zh, en, ru</td>
-						<td id="config-desc-lang"></td>
-					</tr>
-					<tr>
-						<td>cheats</td>
-						<td>1</td>
-						<td id="config-desc-cheats"></td>
-					</tr>
-					<tr>
-						<td>request_original_game</td>
-						<td>1</td>
-						<td id="config-desc-original-game"></td>
-					</tr>
-					<tr>
-						<td>fullscreen</td>
-						<td>0</td>
-						<td id="config-desc-fullscreen"></td>
-					</tr>
-					<tr>
-						<td>max_fps</td>
-						<td>1-240</td>
-						<td id="config-desc-max-fps"></td>
-					</tr>
-					<tr>
-						<td>configurable</td>
-						<td>1</td>
-						<td id="config-desc-configurable"></td>
-					</tr>
-				</tbody>
-			</table>
+			<div class="disclaimer">
+				<p id="thanks">Special thanks:</p>
+				<span id="thanksText">
+					Thanks to the following projects for the inspiration, and to the developers for their efforts, which
+					made it possible for this game to be realized in the browser!
+				</span>
+				<table id="config-table">
+					<thead>
+						<tr>
+							<th id="table-header-item"></th>
+							<th id="table-header-desc"></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td id="primitive"></td>
+							<td><a href="https://github.com/VideogameSources/gta3-decomp-alt"
+									target="_blank">VideogameSources/gta3-decomp-alt</a></td>
+						</tr>
+						<tr>
+							<td id="wasmporting"></td>
+							<td><a href="https://dos.zone/revcdos" target="_blank">DOS.Zone Team</a></td>
+						</tr>
+						<tr>
+							<td id="h5porting"></td>
+							<td><a href="https://my.heheda.top" target="_blank">一只小彤刚</a></td>
+						</tr>
+						<tr>
+							<td id="workerporting"></td>
+							<td><a href="https://my.heheda.top" target="_blank">一只小彤刚</a></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 			<footer class="footer">由 <a class="cf" href="https://www.cloudflare.com" target="_blank"><img
 						src="https://www.cloudflare.com/favicon.ico" alt="Cloudflare"> Cloudflare</a> 和 <a class="eo"
 					href="https://curl.qcloud.com/0f8yZ85J" target="_blank"><img src="https://edgeone.ai/favicon.ico"
@@ -146,9 +128,8 @@
 			<div class="touch-control fireRight"></div>
 			<div class="touch-control fireLeft"></div>
 		</div>
-		<script defer type='text/javascript' src="./modules/7z/js7z.js"></script>
-		<script defer type='text/javascript' src="./script.js"></script>
-		<script defer type='text/javascript' src="./jsdos-cloud-sdk-local.js"></script>
+		<script defer type='text/javascript' src="./script/script.js"></script>
+		<script defer type='text/javascript' src="./script/jsdos-cloud-sdk-local.js"></script>
 		<!-- 谷歌自动广告 -->
 		<script async
 			src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3670070169085381"
