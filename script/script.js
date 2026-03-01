@@ -1154,6 +1154,23 @@ clickToPlay.addEventListener('click', async (e) => {
 						path: path
 					});
 				});
+				// 卸载worker
+				window.addEventListener('beforeunload', () => {
+					if (global7zWorker) {
+						global7zWorker.terminate();
+						global7zWorker = null;
+						console.log('全局Worker已终止');
+					}
+					if (worker) {
+						worker.terminate();
+						worker = null;
+						console.log('私有Worker已终止');
+					}
+					workerFileData = {
+						dataContent: null,
+						wasmContent: null
+					}
+				});
 			} catch (err) {
 				throw new Error(`${errorMsg}: ${err}`);
 			}
@@ -1507,7 +1524,6 @@ clickToPlay.addEventListener('click', async (e) => {
 		introContainer.style.cursor = 'pointer';
 		intro.pause();
 		introContainer.style.display = 'none';
-
 	} catch (err) {
 		setStatus(err.message);
 		console.error('初始化失败:', err);
