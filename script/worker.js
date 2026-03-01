@@ -42,6 +42,7 @@ const process7zFile = async (zName, title, path) => {
 		js7z = await new Promise((resolve) => {
 			setTimeout(async () => {
 				const instance = await JS7z({
+					locateFile: () => './7z/js7z.wasm',
 					print: (str) => {
 						if (str.trim().length > 0) {
 							console.log(str);
