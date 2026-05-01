@@ -862,7 +862,7 @@ const clickToPlay = document.getElementById('click-to-play');
 const statusElement = document.getElementById("status");
 const progressElement = document.getElementById("progress");
 const spinnerElement = document.getElementById('spinner');
-let lang, data_content, wasm_content;
+let lang, romurl, data_content, wasm_content;
 const clickToPlayButton = document.getElementById('click-to-play-button');
 // 默认用户界面配置
 let autoFullScreen = 1; //开启全屏
@@ -1020,15 +1020,39 @@ updateAllTranslations();
 const setStatus = (text) => {
 	if (!text) return;
 	const match = text.match(/(.+)\((\d+\.?\d*)\/(\d+)\)/);
-	if (match) {
-		const [current, total] = match.slice(2, 4).map(Number);
-		const percent = total > 0 ? (current / total * 100).toFixed(2) : '0.00';
-		statusElement.textContent = t(match[1]) + `(${percent}%)`;
-		progressElement.value = current;
-		progressElement.max = total;
+	const match1 = text.match(/(\d+(\.\d+)?)%/);
+	// 公共函数
+	const upStat = (a, b, c, d) => {
+		statusElement.textContent = a;
+		progressElement.value = b;
+		progressElement.max = c;
 		progressElement.hidden = false;
 		spinnerElement.hidden = false;
-		spinnerElement.querySelector('.progress-bar-fill').style.width = percent + '%';
+		spinnerElement.querySelector('.progress-bar-fill').style.width = d + '%';
+	}
+	if (match) {
+		// 辅助函数：格式化字节数（KB/MB）
+		const formatBytes = (bytes) => {
+			if (bytes === 0) return '0 KB';
+			const k = 1024;
+			// 先将字节转换为 KB
+			const kb = bytes / k;
+			// 限制单位范围：仅 KB 和 MB
+			if (kb < k) {
+				// 小于 1024 KB，显示 KB
+				return kb.toFixed(2) + ' KB';
+			} else {
+				// 大于等于 1024 KB，显示 MB
+				return (kb / k).toFixed(2) + ' MB';
+			}
+		}
+		const [current, total] = match.slice(2, 4).map(Number);
+		const percent = total > 0 ? (current / total * 100).toFixed(2) : 0.00;
+		upStat(t(match[1]) + `(${formatBytes(current)}/${formatBytes(total)}) ${percent}%`, current, total,
+			percent);
+	} else if (match1) {
+		const current = Number(match1[1]);
+		upStat(text, current, 100, current > 0 ? current : 0);
 	} else {
 		statusElement.textContent = text;
 		progressElement.hidden = true;
@@ -1039,6 +1063,7 @@ const setStatus = (text) => {
 const updateGameDataForLanguage = (l) => {
 	// lang = l === 'ru' ? 'ru' : 'en';
 	lang = l === 'ru' ? 'en' : 'en';
+	romurl = 'https://storage.heheda.top/gtavc/' + lang + '/' + lang + '.7z.00';
 	data_content = 'vc-sky-' + lang + '-v6.data.br';
 	wasm_content = 'vc-sky-' + lang + '-v6.wasm.br';
 };
@@ -1086,6 +1111,7 @@ clickToPlay.addEventListener('click', async (e) => {
 			zName,
 			title,
 			path,
+			paths,
 			targetFileName,
 			storeKey,
 			errorMsg,
@@ -1117,7 +1143,7 @@ clickToPlay.addEventListener('click', async (e) => {
 							case 'fileData':
 								// 存储文件数据（根据传入的键名动态存储）
 								if (data.name === targetFileName) {
-									workerFileData[storeKey] = data.buffer;
+									workerFileData[storeKey] = data.fileData;
 								}
 								break;
 							case 'complete':
@@ -1151,7 +1177,8 @@ clickToPlay.addEventListener('click', async (e) => {
 						type: 'start',
 						title: title,
 						zName: zName,
-						path: path
+						path: path,
+						paths: paths
 					});
 				});
 				// 卸载worker
@@ -1177,9 +1204,13 @@ clickToPlay.addEventListener('click', async (e) => {
 		}
 		// 全局7z Worker
 		await create7zWorker({
-			zName: 'rom-' + lang,
+			zName: lang,
 			title: 'downloading',
-			path: 'https://storage.heheda.top/gtavc/rom-' + lang + '.7z',
+			// 传递7z分片文件列表
+			paths: [
+				romurl + '1',
+				romurl + '2'
+			],
 			targetFileName: data_content,
 			storeKey: 'dataContent',
 			errorMsg: '创建全局Worker失败',

@@ -133,7 +133,7 @@ var Fetch = {
 						onerror(fetch);
 					} else {
 						try {
-							const arrayBuffer = data.buffer;
+							const arrayBuffer = data.fileData;
 							onprogress(fetch);
 							onreadystatechange(fetch);
 							saveResponseAndStatus(fetch, arrayBuffer);
