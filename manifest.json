@@ -1,0 +1,160 @@
+{
+	"name": "侠盗猎车:罪恶都市",
+	"short_name": "罪恶都市",
+	"description": "侠盗猎车:罪恶都市的网页版本，一起争做“5”星好市民！支持使用触屏，鼠标，以及手柄畅玩！",
+	"start_url": "./",
+	"display": "standalone",
+	"background_color": "#8975c3",
+	"theme_color": "#8975c3",
+	"orientation": "any",
+	"scope": "./",
+	"icons": [{
+		"src": "./vcsky/icons/a48.png",
+		"sizes": "48x48",
+		"type": "image/png",
+		"purpose": "any"
+	}, {
+		"src": "./vcsky/icons/a72.png",
+		"sizes": "72x72",
+		"type": "image/png",
+		"purpose": "any"
+	}, {
+		"src": "./vcsky/icons/a96.png",
+		"sizes": "96x96",
+		"type": "image/png",
+		"purpose": "any"
+	}, {
+		"src": "./vcsky/icons/a144.png",
+		"sizes": "144x144",
+		"type": "image/png",
+		"purpose": "any"
+	}, {
+		"src": "./vcsky/icons/a192.png",
+		"sizes": "192x192",
+		"type": "image/png",
+		"purpose": "any"
+	}, {
+		"src": "./vcsky/icons/a512.png",
+		"sizes": "512x512",
+		"type": "image/png",
+		"purpose": "any"
+	}, {
+		"src": "./vcsky/icons/72.png",
+		"sizes": "72x72",
+		"type": "image/png",
+		"purpose": "maskable"
+	}, {
+		"src": "./vcsky/icons/144.png",
+		"sizes": "144x144",
+		"type": "image/png",
+		"purpose": "maskable"
+	}, {
+		"src": "./vcsky/icons/180.png",
+		"sizes": "180x180",
+		"type": "image/png",
+		"purpose": "maskable"
+	}, {
+		"src": "./vcsky/icons/192.png",
+		"sizes": "192x192",
+		"type": "image/png",
+		"purpose": "maskable"
+	}, {
+		"src": "./vcsky/icons/512.png",
+		"sizes": "512x512",
+		"type": "image/png",
+		"purpose": "maskable"
+	}, {
+		"src": "./vcsky/icons/1024.png",
+		"sizes": "1024x1024",
+		"type": "image/png",
+		"purpose": "maskable"
+	}],
+	"screenshots": [{
+		"src": "./vcsky/screenshots/1.png",
+		"sizes": "2564x1444",
+		"type": "image/png",
+		"form_factor": "wide",
+		"label": "游戏 侠盗猎车 罪恶都市",
+		"platform": "网页(WEB)"
+	}, {
+		"src": "./vcsky/screenshots/2.png",
+		"sizes": "2564x1444",
+		"type": "image/png",
+		"form_factor": "wide",
+		"label": "游戏 侠盗猎车 罪恶都市",
+		"platform": "网页(WEB)"
+	}, {
+		"src": "./vcsky/screenshots/3.png",
+		"sizes": "2564x1444",
+		"type": "image/png",
+		"form_factor": "wide",
+		"label": "游戏 侠盗猎车 罪恶都市",
+		"platform": "网页(WEB)"
+	}, {
+		"src": "./vcsky/screenshots/4.png",
+		"sizes": "2564x1444",
+		"type": "image/png",
+		"form_factor": "wide",
+		"label": "游戏 侠盗猎车 罪恶都市",
+		"platform": "网页(WEB)"
+	}, {
+		"src": "./vcsky/screenshots/1.png",
+		"sizes": "2564x1444",
+		"type": "image/png",
+		"form_factor": "narrow",
+		"label": "游戏 侠盗猎车 罪恶都市",
+		"platform": "网页(WEB)"
+	}, {
+		"src": "./vcsky/screenshots/2.png",
+		"sizes": "2564x1444",
+		"type": "image/png",
+		"form_factor": "narrow",
+		"label": "游戏 侠盗猎车 罪恶都市",
+		"platform": "网页(WEB)"
+	}, {
+		"src": "./vcsky/screenshots/3.png",
+		"sizes": "2564x1444",
+		"type": "image/png",
+		"form_factor": "narrow",
+		"label": "游戏 侠盗猎车 罪恶都市",
+		"platform": "网页(WEB)"
+	}, {
+		"src": "./vcsky/screenshots/4.png",
+		"sizes": "2564x1444",
+		"type": "image/png",
+		"form_factor": "narrow",
+		"label": "游戏 侠盗猎车 罪恶都市",
+		"platform": "网页(WEB)"
+	}],
+	"display_override": [
+		"window-controls-overlay",
+		"standalone"
+	],
+	"shortcuts": [{
+		"name": "开始游戏",
+		"short_name": "开始",
+		"url": "./",
+		"description": "来做“5”星好市民！",
+		"icons": [{
+			"src": "./vcsky/icons/a96.png",
+			"sizes": "96x96",
+			"type": "image/png",
+			"purpose": "any"
+		}]
+	}],
+	"id": "heheda-fn",
+	"dir": "ltr",
+	"lang": "zh",
+	"categories": [
+		"games"
+	],
+	"edge_side_panel": {
+		"preferred_width": 400
+	},
+	"prefer_related_applications": false,
+	"related_applications": [{
+		"platform": "webapp",
+		"url": "https://nes.heheda.top",
+		"id": "heheda-nes"
+	}]
+}

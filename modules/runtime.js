@@ -2675,10 +2675,12 @@ function run(args = arguments_) {
 	}
 	if (Module["setStatus"]) {
 		Module["setStatus"]("Running...");
-		setTimeout(() => {
-			setTimeout(() => Module["setStatus"](""), 1);
-			doRun()
-		}, 1)
+		requestAnimationFrame(() => {
+			requestAnimationFrame(() => {
+				doRun();
+				Module["setStatus"]("");
+			});
+		});
 	} else {
 		doRun()
 	}

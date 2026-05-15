@@ -2,15 +2,38 @@
 <html lang="en-us">
 	<head>
 		<meta charset="utf-8" />
+		<title>侠盗猎车:罪恶都市网页版 - 在线做个五星好市民</title>
 		<meta name="viewport"
 			content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
-		<title>侠盗猎车:罪恶都市•网页版</title>
+		<meta name="description" content="侠盗猎车:罪恶都市网页版，在线做个五星好市民！支持使用触屏，鼠标，以及手柄畅玩！" />
+		<meta name="keywords" content="侠盗猎车,侠盗猎车:罪恶都市,网页游戏,H5游戏,GTAVC" />
+		<meta name="author" content="赵彤刚" />
+		<!-- Meta Tags -->
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-title" content="侠盗猎车" />
+		<meta name="mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="theme-color" content="#8975c3" />
+		<meta name="msapplication-TileColor" content="#8975c3" />
+		<!-- 图标 -->
+		<link rel="icon" type="image/png" sizes="48x48" href="./vcsky/icons/a48.png" />
+		<link rel="icon" type="image/png" sizes="72x72" href="./vcsky/icons/a72.png" />
+		<link rel="icon" type="image/png" sizes="96x96" href="./vcsky/icons/a96.png" />
+		<link rel="icon" type="image/png" sizes="144x144" href="./vcsky/icons/a144.png" />
+		<link rel="icon" type="image/png" sizes="192x192" href="./vcsky/icons/a192.png" />
+		<link rel="icon" type="image/png" sizes="512x512" href="./vcsky/icons/a512.png" />
+		<link rel="shortcut icon" href="./favicon.ico" />
+		<link rel="apple-touch-icon" href="./vcsky/icons/180.png" />
+		<!-- 其它 -->
+		<link rel="manifest" href="./manifest.json" />
 		<link href="./style.css" rel="stylesheet" />
 	</head>
 	<body data-is-touch="0" data-state-car="0" data-state-car-gun="0" data-state-gun="0" data-state-bike="0"
 		data-state-menu="1" data-state-cutscene="0" data-state-mobring="0" data-state-job="0"
 		data-state-disable-controls="0" data-state-panzer="0" data-state-car-with-weapon="0" data-state-hunter="0"
 		data-state-scope-mode="0" data-state-scope-gun="0">
+		<div id="Status"></div>
 		<div class="intro-container" hidden>
 			<video class="intro" src="./vcsky/intro.mp4" preload="auto" loop disablepictureinpicture></video>
 			<div class="loader-container">
@@ -101,9 +124,9 @@
 				</table>
 			</div>
 			<footer class="footer">由 <a class="cf" href="https://www.cloudflare.com" target="_blank"><img
-						src="https://www.cloudflare.com/favicon.ico" alt="Cloudflare"> Cloudflare</a> 和 <a class="eo"
-					href="https://curl.qcloud.com/0f8yZ85J" target="_blank"><img src="https://edgeone.ai/favicon.ico"
-						alt="EdgeOne"> EdgeOne</a> 提供CDN加速</footer>
+						src="https://www.cloudflare.com/favicon.ico" alt="Cloudflare" loading="lazy"> Cloudflare</a> 和
+				<a class="eo" href="https://curl.qcloud.com/0f8yZ85J" target="_blank"><img
+						src="https://edgeone.ai/favicon.ico" alt="EdgeOne" loading="lazy"> EdgeOne</a> 提供CDN加速</footer>
 		</div>
 		<input type="file" id="original-game-file" hidden>
 		<canvas id="canvas"></canvas>

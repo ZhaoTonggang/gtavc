@@ -638,6 +638,42 @@ td {
 	}
 }
 
+/* 状态通知 */
+@keyframes fadeInOut {
+	0% {
+		opacity: 0;
+		transform: translateX(20px);
+	}
+
+	20% {
+		opacity: 1;
+		transform: translateX(0);
+	}
+
+	80% {
+		opacity: 1;
+		transform: translateX(0);
+	}
+
+	100% {
+		opacity: 0;
+		transform: translateX(20px);
+	}
+}
+
+#Status {
+	position: fixed;
+	top: 10px;
+	right: 10px;
+	color: #fff;
+	padding: 8px;
+	border-radius: 4px;
+	font-family: Arial, sans-serif;
+	font-size: 18px;
+	z-index: 99;
+	animation: fadeInOut 5s ease-in-out forwards;
+}
+
 /* 关闭空广告 */
 ins.adsbygoogle[data-ad-status="unfilled"] {
 	display: none !important;

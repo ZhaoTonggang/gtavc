@@ -1,0 +1,4 @@
+User-agent: *
+Allow: *
+Sitemap: https://gtavc.heheda.top/sitemap.txt
+Sitemap: https://gtavc.heheda.cn/sitemap.txt

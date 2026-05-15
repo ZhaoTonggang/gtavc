@@ -1,8 +1,6 @@
 "use strict";
 // 阻止默认事件
-document.addEventListener('contextmenu', (event) => {
-	event.preventDefault();
-});
+document.addEventListener('contextmenu', (event) => event.preventDefault());
 const textDecoder = new TextDecoder();
 /* gamepad模块开始 */
 const defineProperty = Object.defineProperty;
@@ -450,8 +448,8 @@ class GamepadEmulator {
 		let index = startIndex;
 		const maxLen = Math.max(this.emulatedGamepads.length, this.patchedGpadToRealIndexMap.length);
 		do {
-			const metadata = this.emulatedGamepadsMetadata[index];
-			const isFree = this.realGpadToPatchedIndexMap[index] == null && this.patchedGpadToRealIndexMap[index] ==
+			const metadata = this.emulatedGamepadsMetadata[index],
+				isFree = this.realGpadToPatchedIndexMap[index] == null && this.patchedGpadToRealIndexMap[index] ==
 				null;
 			if ((metadata && metadata.overlayMode) || (!metadata && isFree)) break;
 			index++;
@@ -459,8 +457,7 @@ class GamepadEmulator {
 		return index;
 	}
 	monkeyPatchGamepadEvents() {
-		let originalOnConnectDescriptor, originalOnDisconnectDescriptor;
-		let onConnectHandler, onDisconnectHandler;
+		let originalOnConnectDescriptor, originalOnDisconnectDescriptor, onConnectHandler, onDisconnectHandler;
 		if (window.hasOwnProperty("ongamepadconnected")) {
 			originalOnConnectDescriptor = Object.getOwnPropertyDescriptor(window, "ongamepadconnected");
 			originalOnConnectDescriptor.configurable = true;
@@ -487,6 +484,15 @@ class GamepadEmulator {
 				configurable: true
 			});
 		}
+		// 显示/隐藏通知
+		const showNotification = (text) => {
+			const el = document.getElementById('Status');
+			if (!el) return;
+			el.style.backgroundColor = '#ff8fed';
+			el.textContent = text;
+			el.style.display = 'block';
+			setTimeout(() => el.style.display = 'none', 5000);
+		};
 		const handleConnect = (event) => {
 			const gamepad = event.gamepad;
 			if (gamepad && gamepad.emulation === undefined) {
@@ -508,6 +514,7 @@ class GamepadEmulator {
 				window.dispatchEvent(newEvent);
 			}
 			if (onConnectHandler) onConnectHandler.call(window, event);
+			showNotification("🎮 手柄已连接");
 		};
 		window.addEventListener("gamepadconnected", handleConnect);
 		const handleDisconnect = (event) => {
@@ -530,6 +537,7 @@ class GamepadEmulator {
 				window.dispatchEvent(newEvent);
 			}
 			if (onDisconnectHandler) onDisconnectHandler.call(window, event);
+			showNotification("🎮 手柄已断开");
 		};
 		window.addEventListener("gamepaddisconnected", handleDisconnect);
 		return function undo() {
@@ -1120,7 +1128,7 @@ clickToPlay.addEventListener('click', async (e) => {
 		}) => {
 			try {
 				// 创建Worker实例
-				const worker = new Worker('./script/worker.js');
+				let worker = new Worker('./script/worker.js');
 				// 如果需要挂载到指定对象，就进行挂载
 				if (mountTo && mountKey) {
 					mountTo[mountKey] = worker;
@@ -1616,3 +1624,88 @@ configMaxFps.addEventListener('input', (e) => {
 	maxFPS = parseInt(e.target.value) || 0;
 });
 /* game核心模块结束 */
+// 初始化媒体会话
+if ('mediaSession' in navigator) {
+	console.log('🎵 媒体会话 API 可用');
+	navigator.mediaSession.metadata = new MediaMetadata({
+		title: '侠盗猎车:罪恶都市',
+		artist: '网页版',
+		album: '侠盗猎车游戏',
+		artwork: [{
+			src: './vcsky/icons/a512.png',
+			sizes: '512x512',
+			type: 'image/png'
+		}]
+	});
+};
+// 开始 Service Worker
+(async () => {
+	// 浏览器兼容性检测
+	if (!('serviceWorker' in navigator)) {
+		console.log('❌ 当前浏览器不支持 Service Worker');
+		return;
+	}
+	try {
+		// 监听SW发送的消息
+		navigator.serviceWorker.addEventListener('message', (event) => {
+			if (!event.data) return;
+			// 缓存更新完成通知
+			if (event.data.type === 'CACHE_UPDATED') console.log('✨ PWA缓存已更新为版本:', event.data
+				.version);
+			// 缓存状态提示（命中/离线）
+			if (event.data.type === 'CACHE_STATUS') {
+				const {
+					status,
+					version
+				} = event.data, el = document.getElementById('Status');
+				if (!el) return;
+				const [message, color] = status === 'HIT' ? ['使用缓存加载', '#4caf50'] : 'MISS' ? [
+					'正在缓存资源', '#60b5ff'
+				] : ['离线模式', '#ff9800'];
+				el.style.backgroundColor = color;
+				el.textContent = message;
+				console.log(message + '，当前数据版本:' + version);
+				el.style.display = 'block';
+				setTimeout(() => el.style.display = 'none', 5000);
+			}
+		});
+		// 新SW激活后自动刷新页面
+		navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
+		// 版本更新提示函数
+		const showUpdatePrompt = (worker) => {
+			alert('🟢 检测到云端数据差异：\n🎉 有新版数据可用，程序即将自动重启！');
+			try {
+				worker.postMessage('SKIP_WAITING');
+			} catch (err) {
+				console.error('❌ 发送更新消息失败:', err);
+				window.location.reload();
+			}
+		};
+		// 注册Service Worker 并强制浏览器每次都检查sw.js的更新
+		const registration = await navigator.serviceWorker.register('./sw.js', {
+			updateViaCache: 'none'
+		});
+		console.log('✅ Service Worker 注册成功:', registration.scope);
+		// 处理已存在的待激活版本
+		if (registration.waiting) {
+			console.log('🎉 已有新版本等待激活！');
+			showUpdatePrompt(registration.waiting);
+		}
+		// 监听新版本发现
+		registration.addEventListener('updatefound', () => {
+			const newWorker = registration.installing;
+			console.log('🔄 发现新版本！');
+			newWorker.addEventListener('statechange', () => {
+				if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+					console.log('🎉 新版本已准备好！');
+					showUpdatePrompt(newWorker);
+				}
+			}, {
+				once: true
+			});
+		});
+		return registration;
+	} catch (error) {
+		console.log('❌ Service Worker 注册失败:', error);
+	}
+})();

@@ -1,5 +1,15 @@
 let pendingFileReads;
 
+function setFetchStatus(fetch, readyState, status, statusText) {
+	HEAP16[fetch + 40 >> 1] = readyState;
+	HEAP16[fetch + 42 >> 1] = status;
+	stringToUTF8(statusText, fetch + 44, 64);
+}
+
+function setFetchError(fetch, statusCode, statusText) {
+	setFetchStatus(fetch, 4, statusCode, statusText);
+}
+
 function saveResponseAndStatus(fetch, data) {
 	var fetch_attr = fetch + 108;
 	var fetchAttributes = HEAPU32[fetch_attr + 52 >> 2];
@@ -8,27 +18,25 @@ function saveResponseAndStatus(fetch, data) {
 	var oldPtr = HEAPU32[fetch + 12 >> 2];
 	var ptr = 0;
 	var ptrLen = 0;
-	if (data && fetchAttrLoadToMemory && oldPtr === 0) {
+
+	if (data && fetchAttrLoadToMemory) {
 		ptrLen = data.byteLength;
-		// 预分配内存，减少realloc次数
 		ptr = _malloc(ptrLen);
 		HEAPU8.set(new Uint8Array(data), ptr);
-		// 有旧指针则释放
 		if (oldPtr !== 0) _free(oldPtr);
 	}
+
 	HEAPU32[fetch + 12 >> 2] = ptr;
 	writeI53ToI64(fetch + 16, ptrLen);
 	writeI53ToI64(fetch + 24, 0);
 	writeI53ToI64(fetch + 32, data ? data.byteLength : 0);
-	HEAP16[fetch + 40 >> 1] = 4;
-	HEAP16[fetch + 42 >> 1] = 200;
-	stringToUTF8("OK", fetch + 44, 64);
+	setFetchStatus(fetch, 4, 200, "OK");
+
 	if (fetchAttrSynchronous) {
 		var normalizedFilePath = UTF8ToString(HEAPU32[fetch + 8 >> 2]).replace('https://cdn.dos.zone/vcsky', '')
 			.replace(/\\/g, '/');
 		var ruPtr = stringToNewUTF8(normalizedFilePath);
 		HEAPU32[fetch + 200 >> 2] = ruPtr;
-		// 及时释放临时字符串指针
 		setTimeout(() => {
 			if (ruPtr !== 0) _free(ruPtr);
 		}, 0);
@@ -75,29 +83,20 @@ function fetchJS7zFile(fetch, onsuccess, onerror, onprogress, onreadystatechange
 	});
 }
 var Fetch = {
-	async openDatabase(dbname, dbversion) {
-		return new Promise((resolve, reject) => {
-			try {
-				var openRequest = indexedDB.open(dbname, dbversion)
-			} catch (e) {
-				return reject(e)
-			}
-			openRequest.onupgradeneeded = event => {
-				var db = event.target.result;
-				if (db.objectStoreNames.contains("FILES")) {
-					db.deleteObjectStore("FILES")
-				}
-				db.createObjectStore("FILES")
-			};
-			openRequest.onsuccess = event => resolve(event.target.result);
-			openRequest.onerror = reject
-		})
-	},
 	async init() {
 		Fetch.xhrs = new HandleAllocator;
 		addRunDependency("library_fetch_init");
 		try {
-			var db = await Fetch.openDatabase("emscripten_filesystem", 1);
+			const db = await new Promise((resolve, reject) => {
+				const openRequest = indexedDB.open("emscripten_filesystem", 1);
+				openRequest.onupgradeneeded = e => {
+					const db = e.target.result;
+					if (db.objectStoreNames.contains("FILES")) db.deleteObjectStore("FILES");
+					db.createObjectStore("FILES");
+				};
+				openRequest.onsuccess = e => resolve(e.target.result);
+				openRequest.onerror = reject;
+			});
 			Fetch.dbInstance = db;
 			// 初始化Worker全局监听
 			global7zWorker.addEventListener('message', (msg) => {
@@ -199,15 +198,11 @@ function fetchCacheData(db, fetch, data, onsuccess, onerror) {
 		var packages = transaction.objectStore("FILES");
 		var putRequest = packages.put(data, destinationPathStr);
 		putRequest.onsuccess = () => {
-			HEAP16[fetch + 40 >> 1] = 4;
-			HEAP16[fetch + 42 >> 1] = 200;
-			stringToUTF8("OK", fetch + 44, 64);
+			setFetchStatus(fetch, 4, 200, "OK");
 			onsuccess(fetch, 0, destinationPathStr)
 		};
 		putRequest.onerror = error => {
-			HEAP16[fetch + 40 >> 1] = 4;
-			HEAP16[fetch + 42 >> 1] = 413;
-			stringToUTF8("Payload Too Large", fetch + 44, 64);
+			setFetchError(fetch, 413, "Payload Too Large");
 			onerror(fetch, 0, error)
 		}
 	} catch (e) {
@@ -231,28 +226,26 @@ function fetchLoadCachedData(db, fetch, onsuccess, onerror) {
 		getRequest.onsuccess = event => {
 			if (event.target.result) {
 				var value = event.target.result;
-				var len = value.byteLength || value.length;
-				var ptr = _malloc(len);
-				HEAPU8.set(new Uint8Array(value), ptr);
+				var ptr = 0;
+				var ptrLen = 0;
+				if (value) {
+					ptrLen = value.byteLength || value.length;
+					ptr = _malloc(ptrLen);
+					HEAPU8.set(new Uint8Array(value), ptr);
+				}
 				HEAPU32[fetch + 12 >> 2] = ptr;
-				writeI53ToI64(fetch + 16, len);
+				writeI53ToI64(fetch + 16, ptrLen);
 				writeI53ToI64(fetch + 24, 0);
-				writeI53ToI64(fetch + 32, len);
-				HEAP16[fetch + 40 >> 1] = 4;
-				HEAP16[fetch + 42 >> 1] = 200;
-				stringToUTF8("OK", fetch + 44, 64);
+				writeI53ToI64(fetch + 32, ptrLen);
+				setFetchStatus(fetch, 4, 200, "OK");
 				onsuccess(fetch, 0, value)
 			} else {
-				HEAP16[fetch + 40 >> 1] = 4;
-				HEAP16[fetch + 42 >> 1] = 404;
-				stringToUTF8("Not Found", fetch + 44, 64);
+				setFetchError(fetch, 404, "Not Found");
 				onerror(fetch, 0, "no data")
 			}
 		};
 		getRequest.onerror = error => {
-			HEAP16[fetch + 40 >> 1] = 4;
-			HEAP16[fetch + 42 >> 1] = 404;
-			stringToUTF8("Not Found", fetch + 44, 64);
+			setFetchError(fetch, 404, "Not Found");
 			onerror(fetch, 0, error)
 		}
 	} catch (e) {
@@ -279,15 +272,11 @@ function fetchDeleteCachedData(db, fetch, onsuccess, onerror) {
 			writeI53ToI64(fetch + 16, 0);
 			writeI53ToI64(fetch + 24, 0);
 			writeI53ToI64(fetch + 32, 0);
-			HEAP16[fetch + 40 >> 1] = 4;
-			HEAP16[fetch + 42 >> 1] = 200;
-			stringToUTF8("OK", fetch + 44, 64);
+			setFetchStatus(fetch, 4, 200, "OK");
 			onsuccess(fetch, 0, value)
 		};
 		request.onerror = error => {
-			HEAP16[fetch + 40 >> 1] = 4;
-			HEAP16[fetch + 42 >> 1] = 404;
-			stringToUTF8("Not Found", fetch + 44, 64);
+			setFetchError(fetch, 404, "Not Found");
 			onerror(fetch, 0, error)
 		}
 	} catch (e) {
