@@ -670,7 +670,7 @@ td {
 	border-radius: 4px;
 	font-family: Arial, sans-serif;
 	font-size: 18px;
-	z-index: 99;
+	z-index: 9999;
 	animation: fadeInOut 5s ease-in-out forwards;
 }
 
