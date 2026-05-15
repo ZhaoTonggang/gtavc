@@ -142,7 +142,7 @@
 			"purpose": "any"
 		}]
 	}],
-	"id": "heheda-fn",
+	"id": "heheda-gtavc",
 	"dir": "ltr",
 	"lang": "zh",
 	"categories": [
@@ -154,7 +154,7 @@
 	"prefer_related_applications": false,
 	"related_applications": [{
 		"platform": "webapp",
-		"url": "https://nes.heheda.top",
-		"id": "heheda-nes"
+		"url": "https://fn.heheda.top",
+		"id": "heheda-fn"
 	}]
 }
