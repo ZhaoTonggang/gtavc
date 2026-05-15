@@ -1,0 +1,53 @@
+name: Update Service Worker
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths-ignore:
+      - '.git/**'
+      - '.github/**'
+      - 'README.md'
+  workflow_dispatch:
+
+jobs:
+  update-sw:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          
+      - name: Update service worker
+        id: update
+        run: node .github/update-sw.js
+        env:
+          GITHUB_OUTPUT: ${{ github.output }}
+          
+      - name: Check for changes
+        id: git-check
+        run: |
+          git add sw.js
+          if git diff --staged --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Commit and push changes
+        if: steps.git-check.outputs.changed == 'true'
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: update service worker cache"
+          git push
