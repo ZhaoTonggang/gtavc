@@ -5,7 +5,7 @@
 		<title>侠盗猎车:罪恶都市网页版 - 在线做个五星好市民</title>
 		<meta name="viewport"
 			content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
-		<meta name="description" content="侠盗猎车:罪恶都市网页版，在线做个五星好市民！支持使用触屏，鼠标，以及手柄畅玩！" />
+		<meta name="description" content="侠盗猎车:罪恶都市网页版，支持作弊功能，在线做个五星好市民！支持使用触屏，鼠标，以及手柄畅玩！" />
 		<meta name="keywords" content="侠盗猎车,侠盗猎车:罪恶都市,网页游戏,H5游戏,GTAVC" />
 		<meta name="author" content="赵彤刚" />
 		<!-- Meta Tags -->
@@ -23,11 +23,11 @@
 		<link rel="icon" type="image/png" sizes="144x144" href="./vcsky/icons/a144.png" />
 		<link rel="icon" type="image/png" sizes="192x192" href="./vcsky/icons/a192.png" />
 		<link rel="icon" type="image/png" sizes="512x512" href="./vcsky/icons/a512.png" />
-		<link rel="shortcut icon" href="./favicon.ico" />
+		<link rel="shortcut icon" type="image/x-icon" href="./favicon.ico" />
 		<link rel="apple-touch-icon" href="./vcsky/icons/180.png" />
 		<!-- 其它 -->
 		<link rel="manifest" href="./manifest.json" />
-		<link href="./style.css" rel="stylesheet" />
+		<link href="./style.css" type="text/css" rel="stylesheet" />
 	</head>
 	<body data-is-touch="0" data-state-car="0" data-state-car-gun="0" data-state-gun="0" data-state-bike="0"
 		data-state-menu="1" data-state-cutscene="0" data-state-mobring="0" data-state-job="0"
@@ -49,38 +49,28 @@
 				<img class="cover" src="./vcsky/cover.jpg" alt="侠盗猎车:罪恶都市" draggable="false" loading="lazy" />
 				<div id="config-panel">
 					<div class="config-option">
-						<label for="config-lang">
-							<span id="config-lang-label">Language:</span>
-							<select id="config-lang">
-								<option value="zh">简体中文</option>
-								<option value="en">English</option>
-								<option value="ru">русский язык</option>
-							</select>
-						</label>
+						<span id="config-lang-label">Language:</span>
+						<select id="config-lang">
+							<option value="zh">简体中文</option>
+							<option value="en">English</option>
+							<option value="ru">русский язык</option>
+						</select>
 					</div>
 					<div class="config-option">
-						<label for="config-cheats">
-							<input type="checkbox" id="config-cheats" checked>
-							<span id="config-cheats-label">Cheats (F3)</span>
-						</label>
+						<input type="checkbox" id="config-cheats" checked>
+						<span id="config-cheats-label">Cheats (F3)</span>
 					</div>
 					<div class="config-option">
-						<label for="config-fullscreen">
-							<input type="checkbox" id="config-fullscreen" checked>
-							<span id="config-fullscreen-label">Fullscreen</span>
-						</label>
+						<input type="checkbox" id="config-fullscreen" checked>
+						<span id="config-fullscreen-label">Fullscreen</span>
 					</div>
 					<div class="config-option">
-						<label for="config-max-fps">
-							<span id="config-max-fps-label">Max FPS:</span>
-							<input type="number" id="config-max-fps" min="0" max="240" value="0">
-							<span id="config-max-fps-unlimited" style="font-size: 0.8em;">(0 = unlimited)</span>
-						</label>
+						<span id="config-max-fps-label">Max FPS:</span>
+						<input type="number" id="config-max-fps" min="0" max="240" value="0">
+						<span id="config-max-fps-unlimited" style="font-size: 0.8em;">(0 = unlimited)</span>
 					</div>
 				</div>
-				<div id="click-to-play">
-					<button id="click-to-play-button">Click to play</button>
-				</div>
+				<button id="click-to-play-button">Click to play</button>
 			</div>
 			<div class="disclaimer">
 				<p id="disclaimer-text">DISCLAIMER:</p>
@@ -123,10 +113,12 @@
 					</tbody>
 				</table>
 			</div>
-			<footer class="footer">由 <a class="cf" href="https://www.cloudflare.com" target="_blank"><img
-						src="https://www.cloudflare.com/favicon.ico" alt="Cloudflare" loading="lazy"> Cloudflare</a> 和
-				<a class="eo" href="https://curl.qcloud.com/0f8yZ85J" target="_blank"><img
-						src="https://edgeone.ai/favicon.ico" alt="EdgeOne" loading="lazy"> EdgeOne</a> 提供CDN加速</footer>
+			<footer class="footer">由 <a class="cf" href="https://www.cloudflare.com" target="_blank"
+					rel="noopener noreferrer nofollow"><img src="./vcsky/other/cloudflare.ico" alt="Cloudflare"
+						loading="lazy">Cloudflare</a> 和 <a class="eo" href="https://curl.qcloud.com/0f8yZ85J"
+					target="_blank" rel="noopener noreferrer nofollow"><img src="./vcsky/other/edgeone.ico"
+						alt="EdgeOne" loading="lazy">EdgeOne</a> 提供CDN加速
+			</footer>
 		</div>
 		<input type="file" id="original-game-file" hidden>
 		<canvas id="canvas"></canvas>

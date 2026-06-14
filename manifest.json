@@ -1,7 +1,7 @@
 {
 	"name": "侠盗猎车:罪恶都市",
 	"short_name": "罪恶都市",
-	"description": "侠盗猎车:罪恶都市的网页版本，一起争做“5”星好市民！支持使用触屏，鼠标，以及手柄畅玩！",
+	"description": "侠盗猎车:罪恶都市的网页版本，支持作弊功能，一起争做“5”星好市民！支持使用触屏，鼠标，以及手柄畅玩！",
 	"start_url": "./",
 	"display": "standalone",
 	"background_color": "#8975c3",
@@ -98,29 +98,29 @@
 		"label": "游戏 侠盗猎车 罪恶都市",
 		"platform": "网页(WEB)"
 	}, {
-		"src": "./vcsky/screenshots/1.png",
-		"sizes": "2564x1444",
+		"src": "./vcsky/screenshots/m1.png",
+		"sizes": "430x932",
 		"type": "image/png",
 		"form_factor": "narrow",
 		"label": "游戏 侠盗猎车 罪恶都市",
 		"platform": "网页(WEB)"
 	}, {
-		"src": "./vcsky/screenshots/2.png",
-		"sizes": "2564x1444",
+		"src": "./vcsky/screenshots/m2.png",
+		"sizes": "430x932",
 		"type": "image/png",
 		"form_factor": "narrow",
 		"label": "游戏 侠盗猎车 罪恶都市",
 		"platform": "网页(WEB)"
 	}, {
-		"src": "./vcsky/screenshots/3.png",
-		"sizes": "2564x1444",
+		"src": "./vcsky/screenshots/m3.png",
+		"sizes": "430x932",
 		"type": "image/png",
 		"form_factor": "narrow",
 		"label": "游戏 侠盗猎车 罪恶都市",
 		"platform": "网页(WEB)"
 	}, {
-		"src": "./vcsky/screenshots/4.png",
-		"sizes": "2564x1444",
+		"src": "./vcsky/screenshots/m4.png",
+		"sizes": "430x932",
 		"type": "image/png",
 		"form_factor": "narrow",
 		"label": "游戏 侠盗猎车 罪恶都市",
