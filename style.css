@@ -79,8 +79,10 @@ body.gameIsStarted {
 }
 
 .start-container {
+	width: 100%;
 	position: relative;
 	z-index: 1000;
+	overflow: hidden;
 }
 
 #fixBut {
@@ -251,6 +253,10 @@ input:focus {
 	color: #ff4193;
 	font-size: 1.4rem;
 	font-weight: bold;
+}
+
+#fix-texta {
+	color: red;
 }
 
 .touch-controls-wrapper {
@@ -593,6 +599,10 @@ video::-webkit-media-controls {
 table {
 	border-collapse: collapse;
 	width: 100%;
+	text-overflow: ellipsis;
+	table-layout: fixed;
+	overflow: hidden;
+	word-wrap: break-word;
 }
 
 /* 表头样式 */
