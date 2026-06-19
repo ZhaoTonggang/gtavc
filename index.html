@@ -73,7 +73,20 @@
 				<button id="click-to-play-button">Click to play</button>
 			</div>
 			<div class="disclaimer">
+				<p id="fix-tit">异常修复：</p>
+				<hr />
+				<span
+					id="fix-text">游戏运行出现异常(如：黑屏，无反应，无法启动等)，请使用修复功能，这可以解决大多数异常情况。由于程序的实现使用了较为复杂的技术(如云端多节点，本地多线程，离线缓存等)，当云端数据更新时，我们无法保证本地不同模块之间与云端数据的一致性，这是导致程序异常的原因。</span>
+				<hr />
+				<span id="fix-texta">
+					注意：此操作不会影响游戏的存档数据，此操作仅从本地储存中清除指定的数据(包含：游戏数据包和离线缓存文件)，被清除的数据将在联网的环境中重新下载。
+				</span>
+				<hr />
+				<button id="fixBut">点击修复</button>
+			</div>
+			<div class="disclaimer">
 				<p id="disclaimer-text">DISCLAIMER:</p>
+				<hr />
 				<span id="disclaimer-sources">
 					This game is based on an open source version of GTA: Vice City. It is not a commercial release
 					and is not affiliated with Rockstar Games.
@@ -81,10 +94,12 @@
 			</div>
 			<div class="disclaimer">
 				<p id="thanks">Special thanks:</p>
+				<hr />
 				<span id="thanksText">
 					Thanks to the following projects for the inspiration, and to the developers for their efforts, which
 					made it possible for this game to be realized in the browser!
 				</span>
+				<hr />
 				<table id="config-table">
 					<thead>
 						<tr>

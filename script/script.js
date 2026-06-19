@@ -882,6 +882,10 @@ document.body.dataset.isTouch = isTouch ? 1 : 0;
 const translations = {
 	zh: {
 		startGame: "开始游戏",
+		fixtit: '异常修复：',
+		fixtext: '游戏运行出现异常(如：黑屏，无反应，无法启动等)，请使用修复功能，这可以解决大多数异常情况。由于程序的实现使用了较为复杂的技术(如云端多节点，本地多线程，离线缓存等)，当云端数据更新时，我们无法保证本地不同模块之间与云端数据的一致性，这是导致程序异常的原因。',
+		fixtexta: '注意：此操作不会影响游戏的存档数据，此操作仅从本地储存中清除指定的数据(包含：游戏数据包和离线缓存文件)，被清除的数据将在联网的环境中重新下载。',
+		fixbut: '点击修复',
 		openLocalArchive: "打开本地存档",
 		invalidKey: "无效的密钥",
 		checking: "正在检查...",
@@ -914,6 +918,10 @@ const translations = {
 	},
 	en: {
 		startGame: "Start Game",
+		fixtit: 'Exception Fix:',
+		fixtext: "If the game runs into problems (like a black screen, no response, or failing to start), please use the repair feature, as it can fix most issues. Because the program uses some complex technologies (like multi-node cloud, local multi-threading, offline caching, etc.), we can't guarantee that the different local modules will always match the cloud data when it updates, which is what can cause these problems.",
+		fixtexta: "Note: This operation will not affect the game's saved data. It only clears the specified data from local storage (including: game data packages and offline cache files). The cleared data will be re-downloaded in an online environment.",
+		fixbut: 'Click to Repair',
 		openLocalArchive: "Open Local Saves",
 		invalidKey: "invalid key",
 		checking: "checking...",
@@ -928,7 +936,6 @@ const translations = {
 		wasmloading: "Environment downloading...",
 		enterKey: "enter your key",
 		enterJsDosKey: "Enter js-dos key (5 len)",
-
 		ruTranslate: "",
 		configLanguage: "Language:",
 		configCheats: "Cheats (F3)",
@@ -946,6 +953,10 @@ const translations = {
 	},
 	ru: {
 		startGame: "Начать игру",
+		fixtit: 'Восстановление исключений:',
+		fixtext: 'Если игра сталкивается с проблемами (например, черный экран, отсутствие отклика или невозможность запуска), пожалуйста, используйте функцию ремонта, так как она может исправить большинство проблем. Поскольку программа использует некоторые сложные технологии (например, многозвенный облачный сервис, локальную многопоточность, оффлайн-кэширование и т.д.), мы не можем гарантировать, что различные локальные модули всегда будут соответствовать данным облака при его обновлении, что может вызывать эти проблемы.',
+		fixtexta: 'Примечание: Эта операция не повлияет на сохранённые данные игры. Она только очищает указанные данные из локального хранилища (включая: пакеты данных игры и файлы кэширования оффлайн). Очищенные данные будут повторно загружены в онлайн-среде.',
+		fixbut: 'Нажмите, чтобы восстановить',
 		openLocalArchive: "Открыть локальные сохранения",
 		invalidKey: "неверный ключ",
 		checking: "проверка...",
@@ -988,6 +999,14 @@ window.t = (key) => {
 // 更新页面上所有翻译文本的功能
 const updateAllTranslations = () => {
 	if (clickToPlayButton) clickToPlayButton.textContent = t('startGame');
+	const fixtit = document.getElementById('fix-tit');
+	if (fixtit) fixtit.textContent = t('fixtit');
+	const fixtext = document.getElementById('fix-text');
+	if (fixtext) fixtext.textContent = t('fixtext');
+	const fixtexta = document.getElementById('fix-texta');
+	if (fixtexta) fixtexta.textContent = t('fixtexta');
+	const fixbut = document.getElementById('fixBut');
+	if (fixbut) fixbut.textContent = t('fixbut');
 	const openLocalArchiveLink = document.getElementById('open-local-archive-link');
 	if (openLocalArchiveLink) openLocalArchiveLink.textContent = t('openLocalArchive');
 	const disclaimerText = document.getElementById('disclaimer-text');
@@ -1070,7 +1089,7 @@ const setStatus = (text) => {
 const updateGameDataForLanguage = (l) => {
 	// lang = l === 'ru' ? 'ru' : 'en';
 	lang = l === 'ru' ? 'en' : 'en';
-	romurl = 'https://storage.heheda.top/gtavc/' + lang + '/' + lang + '.7z.00';
+	romurl = '../roms/' + lang + '.7z.0';
 	data_content = 'vc-sky-' + lang + '-v6.data.br';
 	wasm_content = 'vc-sky-' + lang + '-v6.wasm.br';
 };
@@ -1214,10 +1233,9 @@ clickToPlayButton.addEventListener('click', async (e) => {
 			zName: lang,
 			title: 'downloading',
 			// 传递7z分片文件列表
-			paths: [
-				romurl + '1',
-				romurl + '2'
-			],
+			paths: Array.from({
+				length: 28
+			}, (_, i) => romurl + String(i + 1).padStart(2, '0')),
 			targetFileName: data_content,
 			storeKey: 'dataContent',
 			errorMsg: '创建全局Worker失败',
@@ -1598,10 +1616,10 @@ wrapIDBFS(console.log).addListener({
 	},
 });
 // 配置模式界面
-const configLang = document.getElementById('config-lang');
-const configCheats = document.getElementById('config-cheats');
-const configFullscreen = document.getElementById('config-fullscreen');
-const configMaxFps = document.getElementById('config-max-fps');
+const configLang = document.getElementById('config-lang'),
+	configCheats = document.getElementById('config-cheats'),
+	configFullscreen = document.getElementById('config-fullscreen'),
+	configMaxFps = document.getElementById('config-max-fps');
 // 从 URL 参数设置初始值
 configCheats.checked = cheatsEnabled;
 configFullscreen.checked = autoFullScreen;
@@ -1623,6 +1641,82 @@ configMaxFps.addEventListener('input', (e) => {
 	maxFPS = parseInt(e.target.value) || 0;
 });
 /* game核心模块结束 */
+/**
+ * 清理本地存储并强制刷新页面
+ * 删除名称不为 "/vc-assets/local/userfiles" 的所有 IndexedDB 数据库
+ * 删除所有 Cache Storage 缓存
+ * 强制刷新页面（绕过本地缓存）
+ */
+document.getElementById('fixBut').addEventListener('click', async () => {
+	console.log('开始清理本地存储数据...');
+	// IndexedDB 清理（立即执行，返回 Promise）
+	const clearIndexedDBTask = (async () => {
+		if (!window.indexedDB) {
+			console.warn('当前环境不支持 IndexedDB，跳过清理');
+			return;
+		}
+		const deleteDatabase = (dbName) => {
+			return new Promise((resolve, reject) => {
+				const request = indexedDB.deleteDatabase(dbName);
+				request.onsuccess = () => {
+					console.log(`IndexedDB 删除成功: ${dbName}`);
+					resolve();
+				};
+				request.onerror = () => {
+					console.error(`IndexedDB 删除失败: ${dbName}`, request.error);
+					reject(request.error);
+				};
+				request.onblocked = () => {
+					console.warn(`IndexedDB 删除被阻塞（数据库正在使用）: ${dbName}，刷新后将生效`);
+					resolve();
+				};
+			});
+		};
+		try {
+			const allDatabases = await indexedDB.databases();
+			const toDelete = allDatabases.filter(db => db.name !==
+				'/vc-assets/local/userfiles');
+			if (toDelete.length > 0) {
+				await Promise.allSettled(toDelete.map(db => deleteDatabase(db.name)));
+				console.log('IndexedDB 清理流程执行完毕');
+			} else {
+				console.log('无需要删除的 IndexedDB 数据库');
+			}
+		} catch (err) {
+			console.error('IndexedDB 清理过程异常:', err);
+		}
+	})();
+	// Cache 缓存清理（立即执行，返回 Promise）
+	const clearCacheTask = (async () => {
+		if (!window.caches) {
+			console.warn('当前环境不支持 Cache Storage，跳过清理');
+			return;
+		}
+		try {
+			const cacheKeys = await caches.keys();
+			if (cacheKeys.length > 0) {
+				const results = await Promise.allSettled(
+					cacheKeys.map(key => caches.delete(key).then(() => {
+						console.log(`Cache 删除成功: ${key}`);
+					}))
+				);
+				const failedCount = results.filter(r => r.status === 'rejected').length;
+				if (failedCount > 0) {
+					console.warn(`部分 Cache 删除失败，共 ${failedCount} 个`);
+				}
+				console.log('Cache 缓存清理流程执行完毕');
+			} else {
+				console.log('无 Cache 缓存需要删除');
+			}
+		} catch (err) {
+			console.error('Cache 清理过程异常:', err);
+		}
+	})();
+	// 并行等待两个任务全部执行结束（无论成功/失败/跳过）
+	await Promise.allSettled([clearIndexedDBTask, clearCacheTask]);
+	console.log('清理流程完成，即将强制刷新页面');
+	location.reload(true);
+});
 // 初始化媒体会话
 if ('mediaSession' in navigator) {
 	console.log('🎵 媒体会话 API 可用');

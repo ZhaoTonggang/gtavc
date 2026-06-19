@@ -1,6 +1,6 @@
 'use strict';
 // 版本
-const Ver = 1781469981,
+const Ver = 1781699917,
 	cName = 'PWA-',
 	postMess = (type, status) => {
 		setTimeout(async () => {
@@ -21,50 +21,50 @@ self.addEventListener('install', e => {
 		try {
 			// 打开缓存并缓存所有资源
 			await (await caches.open(cName + Ver)).addAll([
-			'./',
-			'./404.html',
-			'./favicon.ico',
-			'./index.html',
-			'./manifest.json',
-			'./modules/asm_consts/en.js',
-			'./modules/asm_consts/ru.js',
-			'./modules/audio.js',
-			'./modules/cheats.js',
-			'./modules/events.js',
-			'./modules/fetch.js',
-			'./modules/fs.js',
-			'./modules/graphics.js',
-			'./modules/loader.js',
-			'./modules/main.js',
-			'./modules/packages/en.js',
-			'./modules/packages/ru.js',
-			'./modules/runtime.js',
-			'./modules/syscalls.js',
-			'./script/7z/js7z.js',
-			'./script/7z/js7z.wasm',
-			'./script/jsdos-cloud-sdk-local.js',
-			'./script/jsdos-cloud-sdk.js',
-			'./script/script.js',
-			'./script/worker.js',
-			'./style.css',
-			'./vcsky/cover.jpg',
-			'./vcsky/icons/1024.png',
-			'./vcsky/icons/144.png',
-			'./vcsky/icons/180.png',
-			'./vcsky/icons/192.png',
-			'./vcsky/icons/512.png',
-			'./vcsky/icons/72.png',
-			'./vcsky/icons/a144.png',
-			'./vcsky/icons/a192.png',
-			'./vcsky/icons/a48.png',
-			'./vcsky/icons/a512.png',
-			'./vcsky/icons/a72.png',
-			'./vcsky/icons/a96.png',
-			'./vcsky/intro.mp4',
-			'./vcsky/other/cloudflare.ico',
-			'./vcsky/other/edgeone.ico',
-			'./vcsky/wasted.png'
-		]);
+				'./',
+				'./404.html',
+				'./favicon.ico',
+				'./index.html',
+				'./manifest.json',
+				'./modules/asm_consts/en.js',
+				'./modules/asm_consts/ru.js',
+				'./modules/audio.js',
+				'./modules/cheats.js',
+				'./modules/events.js',
+				'./modules/fetch.js',
+				'./modules/fs.js',
+				'./modules/graphics.js',
+				'./modules/loader.js',
+				'./modules/main.js',
+				'./modules/packages/en.js',
+				'./modules/packages/ru.js',
+				'./modules/runtime.js',
+				'./modules/syscalls.js',
+				'./script/7z/js7z.js',
+				'./script/7z/js7z.wasm',
+				'./script/jsdos-cloud-sdk-local.js',
+				'./script/jsdos-cloud-sdk.js',
+				'./script/script.js',
+				'./script/worker.js',
+				'./style.css',
+				'./vcsky/cover.jpg',
+				'./vcsky/icons/1024.png',
+				'./vcsky/icons/144.png',
+				'./vcsky/icons/180.png',
+				'./vcsky/icons/192.png',
+				'./vcsky/icons/512.png',
+				'./vcsky/icons/72.png',
+				'./vcsky/icons/a144.png',
+				'./vcsky/icons/a192.png',
+				'./vcsky/icons/a48.png',
+				'./vcsky/icons/a512.png',
+				'./vcsky/icons/a72.png',
+				'./vcsky/icons/a96.png',
+				'./vcsky/intro.mp4',
+				'./vcsky/other/cloudflare.ico',
+				'./vcsky/other/edgeone.ico',
+				'./vcsky/wasted.png'
+			]);
 			// 跳过等待，直接激活新SW
 			await self.skipWaiting();
 		} catch (error) {
@@ -104,7 +104,7 @@ self.addEventListener('message', e => e.data === 'SKIP_WAITING' && e.waitUntil(s
 self.addEventListener('fetch', e => {
 	const req = e.request;
 	// 对于 Range 请求或 7z 数据文件，直接绕过 Service Worker
-	if (req.headers.has('Range') || req.url.endsWith('.7z') || req.method !== 'GET' || !req.url.startsWith(
+	if (req.headers.has('Range') || req.url.includes('.7z') || req.method !== 'GET' || !req.url.startsWith(
 			'http')) return;
 	// 判断是否为HTML页面请求
 	const accept = req.headers.get('accept'),

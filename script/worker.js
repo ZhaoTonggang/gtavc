@@ -95,7 +95,6 @@ const downloadSlice = async (path, start, end, index, title, progressTracker, pr
 // 控制并发下载分片（支持进度回调）
 const downloadWithSlices = async (path, title, progressCallback = null) => {
 	// 发送HEAD请求获取文件信息
-	sendStatus('正在获取文件信息...');
 	const headResponse = await fetch(path, {
 		method: 'HEAD'
 	});
@@ -104,7 +103,6 @@ const downloadWithSlices = async (path, title, progressCallback = null) => {
 	if (totalSize) {
 		// 支持分片下载
 		const totalSlices = Math.ceil(totalSize / chunkSize);
-		sendStatus(`文件总大小：${formatBytes(totalSize)}，将分为${totalSlices}个分片并行下载`);
 		const progressTracker = {
 			totalReceived: 0,
 			totalSize: totalSize
@@ -115,10 +113,8 @@ const downloadWithSlices = async (path, title, progressCallback = null) => {
 			const end = Math.min(start + chunkSize - 1, totalSize - 1);
 			sliceTasks.push(downloadSlice(path, start, end, i, title, progressTracker, progressCallback));
 		}
-		sendStatus(`开始并行下载${totalSlices}个分片...`);
 		const sliceResults = await Promise.all(sliceTasks);
 		sliceResults.sort((a, b) => a.index - b.index);
-		sendStatus('所有分片下载完成，正在合并数据...');
 		const buffer = new Uint8Array(totalSize);
 		let position = 0;
 		await runInSlices(function*() {
