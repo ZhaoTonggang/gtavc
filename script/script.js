@@ -1096,6 +1096,8 @@ const updateGameDataForLanguage = (l) => {
 updateGameDataForLanguage(currentLanguage);
 // 开始游戏
 clickToPlayButton.addEventListener('click', async (e) => {
+	const a = confirm("🎮 是否开始游戏？\n\n⚠ 若是初次运行，则需下载游戏所需的数据包（大小约570MB），请注意流量消耗！");
+	if (a !== true) return;
 	if (!isMobile && autoFullScreen) {
 		document.body.requestFullscreen(document.documentElement);
 		const lockMouseIfNeeded = () => {
@@ -1648,6 +1650,10 @@ configMaxFps.addEventListener('input', (e) => {
  * 强制刷新页面（绕过本地缓存）
  */
 document.getElementById('fixBut').addEventListener('click', async () => {
+	const a = confirm(
+		"📌 确认进行修复吗？\n\n✅ 此操作不会影响游戏的存档数据。\n⚠ 此操作从本地储存中清除指定的数据(包含：游戏数据包和离线缓存文件)，被清除的数据将在联网的环境中重新下载。"
+	);
+	if (a !== true) return;
 	console.log('开始清理本地存储数据...');
 	// IndexedDB 清理（立即执行，返回 Promise）
 	const clearIndexedDBTask = (async () => {
