@@ -56,7 +56,7 @@ const downloadSlice = async (path, start, end, index, title, progressTracker, pr
 				'Range': `bytes=${start}-${end}`
 			}
 		});
-		if (!response.ok) throw new Error(`分片${index+1}下载失败：${response.status} ${response.statusText}`);
+		if (!response.ok) throw new Error(`数据包${index+1}下载失败：${response.status} ${response.statusText}`);
 		const reader = response.body.getReader();
 		let chunks = [];
 		let sliceReceivedLength = 0;
@@ -88,7 +88,7 @@ const downloadSlice = async (path, start, end, index, title, progressTracker, pr
 			buffer: sliceBuffer
 		}
 	} catch (err) {
-		sendError(new Error(`分片${index+1}下载出错：${err.message}`));
+		sendError(new Error(`数据包${index+1}下载出错：${err.message}`));
 		throw err;
 	}
 }
@@ -217,48 +217,36 @@ self.onmessage = async function(e) {
 				if (paths && paths.length > 0) {
 					// 使用多分片下载
 					const pathlen = paths.length;
-					sendStatus(`准备下载 ${pathlen} 个分卷文件...`);
-					const fileSizes = []; // 保存每个分卷的大小
-					let totalSize = 0;
+					sendStatus(`准备下载 ${pathlen} 个数据包...`);
 					let allBuffers = [];
-					let accumulatedReceived = 0; // 所有分卷总共已下载字节
-					// 获取所有文件大小
-					for (let i = 0; i < pathlen; i++) {
-						try {
-							const headResponse = await fetch(paths[i], {
-								method: 'HEAD'
-							});
-							const size = Number(headResponse.headers.get('Content-Length')) || 0;
-							fileSizes.push(size);
-							totalSize += size;
-						} catch (err) {
-							fileSizes.push(0);
-							sendStatus(`获取分卷${i+1}信息失败，继续尝试下载...`);
-						}
-					}
-					sendStatus(`总大小: ${formatBytes(totalSize)}, ${pathlen} 个分卷`);
+					let totalSize = 0;
 					// 开始下载每个分卷
 					for (let i = 0; i < pathlen; i++) {
-						// 创建进度回调函数，计算总体进度
-						const progressCallback = (receivedForFile) => {
-							const totalReceived = accumulatedReceived + receivedForFile;
-							sendStatus(`${title} [${i+1}/${pathlen}] ` +
-								`(${totalReceived}/${totalSize})`);
+						sendStatus(`正在下载数据包 ${i+1}/${pathlen}...`);
+						// 创建进度回调函数，只显示当前分卷的进度
+						const progressCallback = (receivedForFile, sizeOfFile) => {
+							if (sizeOfFile && sizeOfFile > 0) {
+								sendStatus(`${title} [${i+1}/${pathlen}] ` +
+									`(${receivedForFile}/${sizeOfFile})`);
+							} else {
+								sendStatus(`${title} [${i+1}/${pathlen}] ` +
+									`(${receivedForFile}/?)`);
+							}
 						}
-						const downloadResult = await downloadWithSlices(paths[i], `分卷${i+1}`,
+						const downloadResult = await downloadWithSlices(paths[i], `数据包${i+1}`,
 							progressCallback);
 						allBuffers.push(downloadResult.buffer);
-						accumulatedReceived += downloadResult.datalen;
+						totalSize += downloadResult.datalen;
 					}
 					// 合并所有分卷
-					sendStatus(`正在合并 ${pathlen} 个分卷...`);
+					sendStatus(`正在合并 ${pathlen} 个数据包...`);
 					const mergedBuffer = new Uint8Array(totalSize);
 					let position = 0;
 					await runInSlices(function*() {
 						for (let i = 0; i < allBuffers.length; i++) {
 							mergedBuffer.set(allBuffers[i], position);
 							position += allBuffers[i].length;
-							sendStatus(`合并分卷 (${position}/${totalSize})`);
+							sendStatus(`合并数据包 (${position}/${totalSize})`);
 							yield;
 						}
 					});
