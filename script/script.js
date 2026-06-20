@@ -1045,20 +1045,19 @@ const updateAllTranslations = () => {
 updateAllTranslations();
 const setStatus = (text) => {
 	if (!text) return;
-	const match = text.match(/(.+)\((\d+\.?\d*)\/(\d+)\)/);
-	const match1 = text.match(/(\d+(\.\d+)?)%/);
-	// 公共函数
-	const upStat = (a, b, c, d) => {
-		statusElement.textContent = a;
-		progressElement.value = b;
-		progressElement.max = c;
-		progressElement.hidden = false;
-		spinnerElement.hidden = false;
-		spinnerElement.querySelector('.progress-bar-fill').style.width = d + '%';
-	}
+	const match = text.match(/(.+)\((\d+\.?\d*)\/(\d+)\)/),
+		matcha = text.match(/(.+)\[(\d+\.?\d*)\/(\d+)\]/),
+		match1 = text.match(/(\d+(\.\d+)?)%/),
+		upStat = (a, b, c, d) => { // 公共函数
+			statusElement.textContent = a;
+			progressElement.value = b;
+			progressElement.max = c;
+			progressElement.hidden = false;
+			spinnerElement.hidden = false;
+			spinnerElement.querySelector('.progress-bar-fill').style.width = d + '%';
+		};
 	if (match) {
-		// 辅助函数：格式化字节数（KB/MB）
-		const formatBytes = (bytes) => {
+		const formatBytes = (bytes) => { // 辅助函数：格式化字节数（KB/MB）
 			if (bytes === 0) return '0 KB';
 			const k = 1024;
 			// 先将字节转换为 KB
@@ -1076,6 +1075,10 @@ const setStatus = (text) => {
 		const percent = total > 0 ? (current / total * 100).toFixed(2) : 0.00;
 		upStat(t(match[1]) + `(${formatBytes(current)}/${formatBytes(total)}) ${percent}%`, current, total,
 			percent);
+	} else if (matcha) {
+		const [current, total] = matcha.slice(2, 4).map(Number);
+		const percent = total > 0 ? (current / total * 100).toFixed(2) : 0.00;
+		upStat(text, current, total, percent);
 	} else if (match1) {
 		const current = Number(match1[1]);
 		upStat(text, current, 100, current > 0 ? current : 0);
@@ -1089,7 +1092,7 @@ const setStatus = (text) => {
 const updateGameDataForLanguage = (l) => {
 	// lang = l === 'ru' ? 'ru' : 'en';
 	lang = l === 'ru' ? 'en' : 'en';
-	romurl = '../roms/' + lang + '.7z.0';
+	romurl = 'https://gtavc.heheda.top/roms/' + lang + '.7z.0';
 	data_content = 'vc-sky-' + lang + '-v6.data.br';
 	wasm_content = 'vc-sky-' + lang + '-v6.wasm.br';
 };

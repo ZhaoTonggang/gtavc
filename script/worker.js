@@ -1,22 +1,19 @@
 importScripts('./7z/js7z.js');
 // 定义数据块大小
 const chunkSize = 1024 * 1024, // 1MB/块
-	// 用于向主线程发送状态更新
-	sendStatus = (message) => {
+	sendStatus = (message) => { // 用于向主线程发送状态更新
 		self.postMessage({
 			type: 'status',
 			data: message
 		});
 	},
-	// 用于向主线程发送错误
-	sendError = (error) => {
+	sendError = (error) => { // 用于向主线程发送错误
 		self.postMessage({
 			type: 'error',
 			error: error.message || error
 		});
 	},
-	// 辅助函数：格式化字节数（KB/MB）
-	formatBytes = (bytes) => {
+	formatBytes = (bytes) => { // 辅助函数：格式化字节数（KB/MB）
 		if (bytes === 0) return '0 KB';
 		const k = 1024;
 		// 先将字节转换为 KB
@@ -30,8 +27,7 @@ const chunkSize = 1024 * 1024, // 1MB/块
 			return (kb / k).toFixed(2) + ' MB';
 		}
 	},
-	// 自动重试工具函数：最多重试 maxRetries 次，失败后等待 1000 再试
-	withRetry = async (fn) => {
+	withRetry = async (fn) => { // 自动重试工具函数：最多重试 maxRetries 次，失败后等待 1000 再试
 			const maxRetries = 5;
 			let lastError;
 			for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -46,8 +42,7 @@ const chunkSize = 1024 * 1024, // 1MB/块
 			}
 			throw lastError;
 		},
-		// 原有的分段执行函数
-		runInSlices = async (task) => {
+		runInSlices = async (task) => { // 分段执行函数
 				const taskIterator = task(),
 					executeSlice = async () => {
 						let startTime = performance.now(),
@@ -64,10 +59,9 @@ const chunkSize = 1024 * 1024, // 1MB/块
 					}
 				return executeSlice();
 			},
-			// 分片下载核心函数（支持进度回调）
 			downloadSlice = async (path, start, end, index, title, progressTracker, progressCallback = null) => {
-					// 使用 withRetry 自动重试，失败时回滚该分片已累计的进度字节数
-					return await withRetry(async (attempt) => {
+					// 分片下载核心函数（支持进度回调）
+					return await withRetry(async (attempt) => { // 使用 withRetry 自动重试，失败时回滚该分片已累计的进度字节数
 						try {
 							if (attempt > 0) {
 								sendStatus(`${title} 数据包${index+1} 第${attempt}次重试...`);
@@ -128,8 +122,7 @@ const chunkSize = 1024 * 1024, // 1MB/块
 						}
 					});
 				},
-				// 控制并发下载分片（支持进度回调，整个文件失败自动重试5次）
-				downloadWithSlices = async (path, title, progressCallback = null) => {
+				downloadWithSlices = async (path, title, progressCallback = null) => { // 控制并发下载分片（支持进度回调，整个文件失败自动重试5次）
 					return await withRetry(async (attempt) => {
 						if (attempt > 0) {
 							sendStatus(`${title} 第${attempt}次重试...`);
@@ -390,14 +383,12 @@ self.onmessage = async (e) => {
 		} catch (err) {
 			sendError(err);
 		} finally {
-			// 清理资源：数据包模式清理所有数据包文件；单文件模式保留原逻辑
+			// 清理资源：数据包模式清理所有数据包文件
 			if (js7z && js7z.FS) {
 				try {
 					if (isMultiVol && volumeNames.length > 0) {
 						for (const v of volumeNames) {
-							if (js7z.FS.analyzePath(v).exists) {
-								js7z.FS.unlink(v);
-							}
+							if (js7z.FS.analyzePath(v).exists) js7z.FS.unlink(v);
 						}
 					} else if (js7z.FS.analyzePath(zName).exists) {
 						js7z.FS.unlink(zName);
