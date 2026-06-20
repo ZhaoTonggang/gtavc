@@ -300,7 +300,7 @@ self.onmessage = async (e) => {
 									`(${receivedForFile}/${sizeOfFile})`);
 							} else {
 								sendStatus(`${title} [${i + 1}/${pathlen}] ` +
-									`(${receivedForFile}/?)`);
+									`(${formatBytes(receivedForFile)})`);
 							}
 						};
 						const downloadResult = await downloadWithSlices(
