@@ -882,7 +882,8 @@ document.body.dataset.isTouch = isTouch ? 1 : 0;
 const translations = {
 	zh: {
 		startGame: "开始游戏",
-		fixtit: '异常修复：',
+		moregame: "更多游戏",
+		fixtit: '异常修复',
 		fixtext: '游戏运行出现异常(如：黑屏，无反应，无法启动等)，请使用修复功能，这可以解决大多数异常情况。由于程序的实现使用了较为复杂的技术(如云端多节点，本地多线程，离线缓存等)，当云端数据更新时，我们无法保证本地不同模块之间与云端数据的一致性，这是导致程序异常的原因。',
 		fixtexta: '注意：此操作不会影响游戏的存档数据，此操作仅从本地储存中清除指定的数据(包含：游戏数据包和离线缓存文件)，被清除的数据将在联网的环境中重新下载。',
 		fixbut: '点击修复',
@@ -892,7 +893,7 @@ const translations = {
 		cloudSaves: "云存档:",
 		enabled: "已启用",
 		disabled: "未启用",
-		disclaimer: "免责声明：",
+		disclaimer: "免责声明",
 		disclaimerSources: "本游戏基于《侠盗猎车手：罪恶都市》开源版本制作，非商业发行，与R星游戏公司（Rockstar Games）无任何关联。",
 		disclaimerPrompt: "你需要提供一份原版游戏文件，以确认你拥有该游戏的原版所有权。",
 		demoAlert: "演示版仅用于熟悉游戏技术架构，所有功能均可使用，但无法推进游戏剧情主线。请提供原版游戏文件以启动完整版。",
@@ -906,7 +907,7 @@ const translations = {
 		configFullscreen: "全屏模式",
 		configMaxFps: "帧率限制：",
 		configUnlimited: "（0 = 无限制）",
-		thanks: "特别感谢：",
+		thanks: "特别感谢",
 		thanksText: "感谢以下项目给予的灵感，以及开发者们的付出，得以让本游戏在浏览器中实现！",
 		// 表格翻译
 		tableHeaderItem: "名称/说明",
@@ -918,7 +919,8 @@ const translations = {
 	},
 	en: {
 		startGame: "Start Game",
-		fixtit: 'Exception Fix:',
+		moregame: "More games",
+		fixtit: 'Exception Fix',
 		fixtext: "If the game runs into problems (like a black screen, no response, or failing to start), please use the repair feature, as it can fix most issues. Because the program uses some complex technologies (like multi-node cloud, local multi-threading, offline caching, etc.), we can't guarantee that the different local modules will always match the cloud data when it updates, which is what can cause these problems.",
 		fixtexta: "Note: This operation will not affect the game's saved data. It only clears the specified data from local storage (including: game data packages and offline cache files). The cleared data will be re-downloaded in an online environment.",
 		fixbut: 'Click to Repair',
@@ -928,7 +930,7 @@ const translations = {
 		cloudSaves: "Cloud saves:",
 		enabled: "enabled",
 		disabled: "disabled",
-		disclaimer: "DISCLAIMER:",
+		disclaimer: "DISCLAIMER",
 		disclaimerSources: "This game is based on an open source version of GTA: Vice City. It is not a commercial release and is not affiliated with Rockstar Games.",
 		disclaimerPrompt: "You need to provide a file from the original game to confirm ownership of the original game.",
 		demoAlert: "The demo version is intended only for familiarizing yourself with the game technology. All features are available, but you won't be able to progress through the game's storyline. Please provide the original game files to launch the full version.",
@@ -942,7 +944,7 @@ const translations = {
 		configFullscreen: "Fullscreen",
 		configMaxFps: "Max FPS:",
 		configUnlimited: "(0 = unlimited)",
-		thanks: "Special thanks:",
+		thanks: "Special thanks",
 		thanksText: "Thanks to the following projects for the inspiration, and to the developers for their efforts, which made it possible for this game to be realized in the browser!",
 		tableHeaderItem: "Name/Description",
 		tableHeaderDesc: "Author/Source",
@@ -953,7 +955,8 @@ const translations = {
 	},
 	ru: {
 		startGame: "Начать игру",
-		fixtit: 'Восстановление исключений:',
+		moregame: "Больше игр",
+		fixtit: 'Восстановление исключений',
 		fixtext: 'Если игра сталкивается с проблемами (например, черный экран, отсутствие отклика или невозможность запуска), пожалуйста, используйте функцию ремонта, так как она может исправить большинство проблем. Поскольку программа использует некоторые сложные технологии (например, многозвенный облачный сервис, локальную многопоточность, оффлайн-кэширование и т.д.), мы не можем гарантировать, что различные локальные модули всегда будут соответствовать данным облака при его обновлении, что может вызывать эти проблемы.',
 		fixtexta: 'Примечание: Эта операция не повлияет на сохранённые данные игры. Она только очищает указанные данные из локального хранилища (включая: пакеты данных игры и файлы кэширования оффлайн). Очищенные данные будут повторно загружены в онлайн-среде.',
 		fixbut: 'Нажмите, чтобы восстановить',
@@ -963,7 +966,7 @@ const translations = {
 		cloudSaves: "Облачные сохранения:",
 		enabled: "включены",
 		disabled: "выключены",
-		disclaimer: "ОТКАЗ ОТ ОТВЕТСТВЕННОСТИ:",
+		disclaimer: "ОТКАЗ ОТ ОТВЕТСТВЕННОСТИ",
 		disclaimerSources: "Эта игра основана на открытой версии GTA: Vice City. Она не является коммерческим изданием и не связана с Rockstar Games.",
 		disclaimerPrompt: "Вам потребуется приложить какой-либо файл из оригинальной игры для подтверждения владения оригинальной игрой.",
 		demoAlert: "Демо версия предназначена только для ознакомления с технологией игры. Все функции доступны, но вы не сможете продолжить игру по сюжету. Пожалуйста, предоставьте оригинальные файлы игры для запуска полной версии.",
@@ -982,7 +985,7 @@ const translations = {
 		configFullscreen: "Полный экран",
 		configMaxFps: "Макс. FPS:",
 		configUnlimited: "(0 = без ограничений)",
-		thanks: "Особая благодарность:",
+		thanks: "Особая благодарность",
 		thanksText: "Благодарим следующие проекты за вдохновение и усилия разработчиков, благодаря которым эта игра стала возможной в браузере!",
 		tableHeaderItem: "Название/Описание",
 		tableHeaderDesc: "Автор/Источник",
@@ -999,6 +1002,8 @@ window.t = (key) => {
 // 更新页面上所有翻译文本的功能
 const updateAllTranslations = () => {
 	if (clickToPlayButton) clickToPlayButton.textContent = t('startGame');
+	const moregame = document.getElementById('moregame');
+	if (moregame) moregame.textContent = t('moregame');
 	const fixtit = document.getElementById('fix-tit');
 	if (fixtit) fixtit.textContent = t('fixtit');
 	const fixtext = document.getElementById('fix-text');

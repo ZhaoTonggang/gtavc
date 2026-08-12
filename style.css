@@ -84,37 +84,72 @@ body.gameIsStarted {
 	overflow: hidden;
 }
 
-#fixBut {
-	font-size: 1.2rem;
+#moregame {
+	display: block;
+	width: max-content;
+	margin: 20px auto;
+	border: 2px solid #00aaff;
+	color: #00aaff;
+	box-shadow: inset 0 0 .5em #00aaff, 0 0 .75em #00aaff;
+	text-shadow: 0 0 5px #00aaff, 0 0 1em #00aaff;
 }
 
+#fixBut {
+	font-size: 1.2rem;
+	border: 2px solid #aa0000;
+	color: #aa0000;
+	box-shadow: inset 0 0 .5em #aa0000, 0 0 .75em #aa0000;
+	text-shadow: 0 0 5px #aa0000, 0 0 1em #aa0000;
+}
+
+#moregame,
 #fixBut,
 #click-to-play-button {
 	background: none;
 	cursor: pointer;
-	border: 2px solid #ff4193;
-	color: #ff4193;
 	text-transform: uppercase;
 	padding: .3em .5em;
 	text-decoration: none;
 	font-weight: bold;
 	border-radius: .7em;
+}
+
+#click-to-play-button {
+	border: 2px solid #ff4193;
+	color: #ff4193;
 	box-shadow: inset 0 0 .5em #ff4193aa, 0 0 .75em #ff4193aa;
 	text-shadow: 0 0 5px #ff4193aa, 0 0 1em #ff4193;
 }
 
+#moregame,
 #click-to-play-button {
 	font-size: 2em;
 }
 
+#moregame:hover,
+#moregame:focus,
 #fixBut:hover,
 #fixBut:focus,
 #click-to-play-button:hover,
 #click-to-play-button:focus {
-	background: #ff4193;
 	color: #fff;
 	text-shadow: 0 0 5px #fff;
 	outline: none;
+}
+
+#moregame:hover,
+#moregame:focus {
+	background: #00aaff;
+}
+
+#fixBut:hover,
+#fixBut:focus {
+	background: #aa0000;
+}
+
+#click-to-play-button:hover,
+#click-to-play-button:focus {
+	background: #ff4193;
 }
 
 .click-to-archive {

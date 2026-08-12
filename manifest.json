@@ -1,7 +1,7 @@
 {
-	"name": "侠盗猎车:罪恶都市",
+	"name": "侠盗猎车手:罪恶都市",
 	"short_name": "罪恶都市",
-	"description": "侠盗猎车:罪恶都市的网页版本，支持作弊功能，一起争做“5”星好市民！支持使用触屏，鼠标，以及手柄畅玩！",
+	"description": "侠盗猎车手:罪恶都市网页版，支持作弊功能，在线做个五星好市民！支持使用触屏，鼠标，以及手柄畅玩！",
 	"start_url": "./",
 	"display": "standalone",
 	"background_color": "#8975c3",
@@ -134,7 +134,7 @@
 		"name": "开始游戏",
 		"short_name": "开始",
 		"url": "./",
-		"description": "来做“5”星好市民！",
+		"description": "做个五星好市民！",
 		"icons": [{
 			"src": "./vcsky/icons/a96.png",
 			"sizes": "96x96",
