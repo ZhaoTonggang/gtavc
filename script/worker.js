@@ -59,148 +59,53 @@ const chunkSize = 1024 * 1024, // 1MB/块
 					}
 				return executeSlice();
 			},
-			downloadSlice = async (path, start, end, index, title, progressTracker, progressCallback = null) => {
-					// 分片下载核心函数（支持进度回调）
-					return await withRetry(async (attempt) => { // 使用 withRetry 自动重试，失败时回滚该分片已累计的进度字节数
-						try {
-							if (attempt > 0) {
-								sendStatus(`${title} 数据包${index+1} 第${attempt}次重试...`);
-							}
-							const response = await fetch(path, {
-								headers: {
-									'Range': `bytes=${start}-${end}`
-								}
-							});
-							if (!response.ok) throw new Error(
-								`数据包${index+1}下载失败：${response.status} ${response.statusText}`);
-							const reader = response.body.getReader();
-							let chunks = [],
-								sliceReceivedLength = 0;
-							// 记录本次尝试开始时的进度，失败时回滚
-							const prevReceived = progressTracker.totalReceived;
-							try {
-								while (true) {
-									const {
-										done,
-										value
-									} = await reader.read();
-									if (done) break;
-									chunks.push(value);
-									sliceReceivedLength += value.length;
-									progressTracker.totalReceived = prevReceived + sliceReceivedLength;
-									// 优先使用回调，否则使用默认行为
-									if (progressCallback) {
-										progressCallback(progressTracker.totalReceived, progressTracker
-											.totalSize);
-									} else {
-										sendStatus(
-											`${title}(${progressTracker.totalReceived}/${progressTracker.totalSize})`
-										);
-									}
-									await new Promise(resolve => setTimeout(resolve, 0));
-								}
-							} catch (innerErr) {
-								// 读取中途失败，回滚该分片已累计的字节数
-								progressTracker.totalReceived = prevReceived;
-								throw innerErr;
-							}
-							const sliceBuffer = new Uint8Array(sliceReceivedLength);
-							let position = 0;
-							for (const chunk of chunks) {
-								sliceBuffer.set(chunk, position);
-								position += chunk.length;
-							}
-							return {
-								index,
-								buffer: sliceBuffer
-							}
-						} catch (err) {
-							if (attempt >= 5) {
-								sendError(new Error(`数据包${index+1}下载出错（已重试5次）：${err.message}`));
-							}
-							throw err;
-						}
-					});
-				},
-				downloadWithSlices = async (path, title, progressCallback = null) => { // 控制并发下载分片（支持进度回调，整个文件失败自动重试5次）
-					return await withRetry(async (attempt) => {
-						if (attempt > 0) {
-							sendStatus(`${title} 第${attempt}次重试...`);
-						}
-						// 发送HEAD请求获取文件信息
-						const headResponse = await fetch(path, {
-							method: 'HEAD'
-						});
-						if (!headResponse.ok) throw new Error(
-							`获取文件信息失败：${headResponse.status} ${headResponse.statusText}`);
-						const totalSize = Number(headResponse.headers.get('Content-Length')) || 0;
-						if (totalSize) {
-							// 支持分片下载
-							const totalSlices = Math.ceil(totalSize / chunkSize),
-								progressTracker = {
-									totalReceived: 0,
-									totalSize: totalSize
-								}
-							const sliceTasks = [];
-							for (let i = 0; i < totalSlices; i++) {
-								const start = i * chunkSize,
-									end = Math.min(start + chunkSize - 1, totalSize - 1);
-								sliceTasks.push(downloadSlice(path, start, end, i, title,
-									progressTracker,
-									progressCallback));
-							}
-							const sliceResults = await Promise.all(sliceTasks);
-							sliceResults.sort((a, b) => a.index - b.index);
-							const buffer = new Uint8Array(totalSize);
-							let position = 0;
-							await runInSlices(function*() {
-								for (const slice of sliceResults) {
-									buffer.set(slice.buffer, position);
-									position += slice.buffer.length;
-									yield;
-								}
-							});
-							return {
-								buffer,
-								datalen: totalSize
-							}
-						}
-						// 回退到单线程下载
-						sendStatus('服务器不支持分片下载，将使用单线程下载');
-						const response = await fetch(path);
-						if (!response.ok) throw new Error(
-							`下载失败：${response.status} ${response.statusText}`);
-						const zdata = response.body.getReader();
-						let chunks = [],
-							totalReceived = 0;
-						while (true) {
-							const {
-								done,
-								value
-							} = await zdata.read();
-							if (done) break;
-							chunks.push(value);
-							totalReceived += value.length;
-							// 调用进度回调
-							if (progressCallback) {
-								progressCallback(totalReceived, totalSize);
+			downloadWithSlices = async (path, title, progressCallback = null) => {
+				return await withRetry(async (attempt) => {
+					if (attempt > 0) {
+						sendStatus(`${title} 第${attempt}次重试...`);
+					}
+					const response = await fetch(path);
+					if (!response.ok) throw new Error(
+						`下载失败：${response.status} ${response.statusText}`);
+					const totalSize = Number(response.headers.get('Content-Length')) || 0;
+					const reader = response.body.getReader();
+					let chunks = [],
+						totalReceived = 0;
+					while (true) {
+						const {
+							done,
+							value
+						} = await reader.read();
+						if (done) break;
+						chunks.push(value);
+						totalReceived += value.length;
+						if (progressCallback) {
+							progressCallback(totalReceived, totalSize);
+						} else {
+							if (totalSize) {
+								sendStatus(
+									`${title}(${totalReceived}/${totalSize})`
+								);
 							} else {
-								sendStatus(`${title}(${totalReceived}/${totalSize})`);
+								sendStatus(
+									`${title}(${formatBytes(totalReceived)})`
+								);
 							}
-							await new Promise(resolve => setTimeout(resolve, 0));
 						}
-						const buffer = new Uint8Array(totalReceived);
-						let position = 0;
-						for (const chunk of chunks) {
-							buffer.set(chunk, position);
-							position += chunk.length;
-						}
-						return {
-							buffer,
-							datalen: totalSize
-						}
-					});
-				};
+						await new Promise(resolve => setTimeout(resolve, 0));
+					}
+					const buffer = new Uint8Array(totalReceived);
+					let position = 0;
+					for (const chunk of chunks) {
+						buffer.set(chunk, position);
+						position += chunk.length;
+					}
+					return {
+						buffer,
+						datalen: totalSize || totalReceived
+					}
+				});
+			};
 let js7z = null;
 // 监听主线程消息
 self.onmessage = async (e) => {
@@ -248,7 +153,7 @@ self.onmessage = async (e) => {
 			cache = await caches.open('GameData');
 			// 判断是单个文件还是多分片文件
 			if (isMultiVol) {
-				// ========== 多数据包模式：每个数据包独立下载 → 写 VFS → 按数据包缓存 ==========
+				// 每个数据包独立下载 → 写 VFS → 按数据包缓存
 				const pathlen = paths.length;
 				sendStatus(`准备下载 ${pathlen} 个数据包...`);
 				// 先检查缓存中是否所有数据包都存在
@@ -282,24 +187,55 @@ self.onmessage = async (e) => {
 						volumeNames.push(volName);
 					}
 				} else {
-					// 有缺失 → 重新下载所有数据包（避免部分缓存导致数据不一致）
-					for (let i = 0; i < pathlen; i++) {
-						const volName = `${zName}.${String(i + 1).padStart(3, '0')}`;
-						sendStatus(`正在下载数据包 ${i + 1}/${pathlen}...`);
-						// 创建进度回调（仅显示当前数据包的下载进度）
-						const progressCallback = (receivedForFile, sizeOfFile) => {
-							if (sizeOfFile && sizeOfFile > 0) {
-								sendStatus(`${title} [${i + 1}/${pathlen}] ` +
-									`(${receivedForFile}/${sizeOfFile})`);
-							} else {
-								sendStatus(`${title} [${i + 1}/${pathlen}] ` +
-									`(${formatBytes(receivedForFile)})`);
-							}
-						};
-						const downloadResult = await downloadWithSlices(
-								paths[i], `数据包${i + 1}`, progressCallback),
-							data = downloadResult.buffer;
-						// 写入 VFS（边下边写，写完即释放主内存引用）
+					// 有缺失 → 并行下载所有数据包
+					sendStatus(`正在并行下载 ${pathlen} 个数据包...`);
+					let lastStatusTime = 0;
+					const volProgress = new Array(pathlen).fill(0),
+						volSizes = new Array(pathlen).fill(0),
+						downloadTasks = paths.map((path, i) => {
+							const volName = `${zName}.${String(i + 1).padStart(3, '0')}`,
+								progressCallback = (received, size) => {
+									volProgress[i] = received;
+									volSizes[i] = size || 0;
+									const now = performance.now();
+									if (now - lastStatusTime < 200) return;
+									lastStatusTime = now;
+									sendStatus(`数据包下载中... ` +
+										`(${volProgress.reduce((a, b) => a + b, 0)}/${volSizes.reduce((a, b) => a + b, 0) || 582445637})`
+									);
+								};
+							return downloadWithSlices(path, `数据包${i + 1}`, progressCallback)
+								.then(result => ({
+									volName,
+									data: result.buffer,
+									datalen: result.datalen,
+									index: i,
+									success: true
+								}))
+								.catch(err => ({
+									volName,
+									index: i,
+									success: false,
+									error: err
+								}));
+						});
+					const results = await Promise.all(downloadTasks),
+						failed = results.filter(r => !r.success);
+					if (failed.length > 0) throw new Error(`数据包下载失败: ${failed.map(f => f.volName).join(', ')}`);
+					const sortedResults = results
+						.filter(r => r.success)
+						.sort((a, b) => a.index - b.index);
+					sendStatus(`所有数据包下载完成，正在写入...`);
+					const totalWriteBytes = sortedResults.reduce((sum, r) => sum + r.data.length, 0),
+						sortedRlen = sortedResults.length;
+					let writtenBytes = 0;
+					for (let i = 0; i < sortedRlen; i++) {
+						const result = sortedResults[i];
+						const {
+							volName,
+							datalen
+						} = result;
+						let data = result.data;
 						await runInSlices(function*() {
 							let stream = null;
 							try {
@@ -310,22 +246,26 @@ self.onmessage = async (e) => {
 									const end = Math.min(pos + chunkSize, blen);
 									js7z.FS.write(stream, data.subarray(pos, end), 0, end - pos);
 									pos = end;
-									sendStatus(`写入数据包 ${i + 1} (${pos}/${blen})`);
+									sendStatus(
+										`正在写入数据... [当前:${volName} | 第:${i + 1}个 / 共:${sortedRlen}个] (${writtenBytes + pos}/${totalWriteBytes})`
+									);
 									yield;
 								}
 							} finally {
 								if (stream) js7z.FS.close(stream);
 							}
 						});
-						// 异步写入缓存（不阻塞流程）
+						writtenBytes += data.length;
 						cache.put(volName, new Response(data, {
 							headers: {
 								'Content-Type': 'application/x-7z-compressed',
-								'Content-Length': downloadResult.datalen
+								'Content-Length': datalen
 							}
 						})).catch((err) => {
 							console.error(`缓存数据包 ${volName} 失败：`, err);
 						});
+						data = null;
+						result.data = null;
 						volumeNames.push(volName);
 					}
 				}

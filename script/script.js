@@ -1051,7 +1051,6 @@ updateAllTranslations();
 const setStatus = (text) => {
 	if (!text) return;
 	const match = text.match(/(.+)\((\d+\.?\d*)\/(\d+)\)/),
-		matcha = text.match(/(.+)\[(\d+\.?\d*)\/(\d+)\]/),
 		match1 = text.match(/(\d+(\.\d+)?)%/),
 		upStat = (a, b, c, d) => { // 公共函数
 			statusElement.textContent = a;
@@ -1080,10 +1079,6 @@ const setStatus = (text) => {
 		const percent = total > 0 ? (current / total * 100).toFixed(2) : 0.00;
 		upStat(t(match[1]) + `(${formatBytes(current)}/${formatBytes(total)}) ${percent}%`, current, total,
 			percent);
-	} else if (matcha) {
-		const [current, total] = matcha.slice(2, 4).map(Number);
-		const percent = total > 0 ? (current / total * 100).toFixed(2) : 0.00;
-		upStat(text, current, total, percent);
 	} else if (match1) {
 		const current = Number(match1[1]);
 		upStat(text, current, 100, current > 0 ? current : 0);
